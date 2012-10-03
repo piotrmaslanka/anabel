@@ -28,17 +28,19 @@ Anabel::TimeSeries::TimeSeries(std::string rdpath, bool allow_write, bool wait_i
 	// Sanity checks on the path
 	path rootdir(rdpath);
 
-	if (!exists(rootdir)) throw InvalidRootDirectory("Root directory does not exist");
-	if (!is_directory(rootdir)) throw InvalidRootDirectory("Root directory not a directory");
+	if (!exists(rdpath)) throw InvalidRootDirectory("Root directory does not exist");
+	if (!is_directory(rdpath)) throw InvalidRootDirectory("Root directory not a directory");
 
-	path conffile_path(rdpath);
-	path lockfile_path(rdpath);
+	path conffile_path(rootdir);
+	conffile_path /= "conf";
+	path lockfile_path(rootdir);
+	lockfile_path /= "lock";
 
 	if (!exists(conffile_path)) throw InvalidRootDirectory("conf file not found");
 
 	// Attempt to properly lock the file
-	this->flock = new file_lock((char*)(lockfile_path.c_str()));
 	try {
+		this->flock = new file_lock((char*)(lockfile_path.string().c_str()));
 		if (allow_write) {
 			if (wait_if_locked) this->flock->lock();
 			else this->flock->try_lock();
@@ -53,7 +55,7 @@ Anabel::TimeSeries::TimeSeries(std::string rdpath, bool allow_write, bool wait_i
 	this->write_available = allow_write;
 
 	// Read type of time series
-	std::ifstream conf(conffile_path.c_str());
+	std::ifstream conf(conffile_path.string());
 	int ftype;
 	conf >> ftype;
 	conf.close();
