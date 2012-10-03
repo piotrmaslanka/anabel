@@ -16,4 +16,25 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #include <iostream>
+#include <boost/interprocess/sync/file_lock.hpp>
 
+namespace Anabel {
+
+	enum TimeSeriesType {
+		TST__GUARD_BOTTOM,		// don't move, this is a guard to check for surefire invalid timeseries directories
+
+		TST_INT32,
+
+		TST__GUARD_TOP,			// don't move, this is a guard to check for surefire invalid timeseries directories
+	};
+
+	class TimeSeries {
+		private:
+			bool write_available;
+			boost::interprocess::file_lock * flock;
+		public:
+			TimeSeriesType type;
+			TimeSeries(std::string rdpath, bool allow_write=false, bool wait_if_locked=false);
+			~TimeSeries();
+	};
+};

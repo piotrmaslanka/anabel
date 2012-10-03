@@ -4,7 +4,7 @@
 	in a way that faciliates fast lookups and low
 	space consumption
 
-	(c) by Piotr Maœlanka 2012
+	Copyright (c) 2012, Piotr Maœlanka
 
     Anabel is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,10 +20,6 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include <iostream>
+#include "exceptions.h"
+#include "timeseries.h"
 
-namespace Anabel {
-	class DataSource {
-		DataSource(std::string root_directory);
-	};
-};

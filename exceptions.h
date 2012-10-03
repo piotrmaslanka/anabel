@@ -17,3 +17,14 @@
 */
 #include <iostream>
 
+namespace Anabel {
+	namespace Exceptions {
+		class TimeSeriesLocked {};
+		class UnrecognizedTimeSeriesType {};
+		class InvalidRootDirectory {
+			public:
+				std::string reason;
+				InvalidRootDirectory(std::string errreason);
+		};
+	};
+};
