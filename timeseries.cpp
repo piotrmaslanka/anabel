@@ -1,5 +1,5 @@
 /* 
-	This file is part of Anabel
+    This file is part of Anabel
 
     Anabel is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 #include "timeseries.h"
 #include "exceptions.h"
 #include <fstream>
-#include <boost/filesystem.hpp>
 
 using namespace boost::filesystem;
 using namespace boost::interprocess;
@@ -26,14 +25,14 @@ using namespace Anabel::Exceptions;
 
 Anabel::TimeSeries::TimeSeries(std::string rdpath, bool allow_write, bool wait_if_locked) {
 	// Sanity checks on the path
-	path rootdir(rdpath);
+	this->root_path = new path(rdpath);
 
-	if (!exists(rdpath)) throw InvalidRootDirectory("Root directory does not exist");
-	if (!is_directory(rdpath)) throw InvalidRootDirectory("Root directory not a directory");
+	if (!exists(*this->root_path)) throw InvalidRootDirectory("Root directory does not exist");
+	if (!is_directory(*this->root_path)) throw InvalidRootDirectory("Root directory not a directory");
 
-	path conffile_path(rootdir);
+	path conffile_path(*this->root_path);
 	conffile_path /= "conf";
-	path lockfile_path(rootdir);
+	path lockfile_path(*this->root_path);
 	lockfile_path /= "lock";
 
 	if (!exists(conffile_path)) throw InvalidRootDirectory("conf file not found");
@@ -73,4 +72,5 @@ Anabel::TimeSeries::~TimeSeries() {
 	else
 		this->flock->unlock_sharable();
 	delete this->flock;
+	delete this->root_path;
 }

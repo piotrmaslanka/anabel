@@ -1,5 +1,5 @@
 /* 
-	This file is part of Anabel
+    This file is part of Anabel
 
     Anabel is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 */
 #include <iostream>
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/filesystem.hpp>
 
 namespace Anabel {
 
@@ -32,6 +33,7 @@ namespace Anabel {
 		private:
 			bool write_available;
 			boost::interprocess::file_lock * flock;
+			boost::filesystem::path * root_path;
 		public:
 			TimeSeriesType type;
 			TimeSeries(std::string rdpath, bool allow_write=false, bool wait_if_locked=false);

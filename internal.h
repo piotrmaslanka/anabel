@@ -1,10 +1,5 @@
-/*
-    Anabel is an incremental data-series database
-    to store large amount of simply typed information
-    in a way that faciliates fast lookups and low
-    space consumption
-
-    Copyright (c) 2012, Piotr Maœlanka
+/* 
+    This file is part of Anabel
 
     Anabel is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,10 +15,12 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include <anabel/exceptions.h>
-#include <anabel/timeseries.h>
+#include <vector>
+#include <anabel/anabel.h>
+#include <boost/filesystem.hpp>
 
 namespace Anabel {
-	typedef long long Timestamp;
+	namespace Internal {
+		std::vector<std::string> inquire_files(Anabel::TimeSeries * timeseries, Anabel::Timestamp from, Anabel::Timestamp to);
+	};
 };
-
