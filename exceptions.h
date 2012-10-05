@@ -20,11 +20,20 @@
 namespace Anabel {
 	namespace Exceptions {
 		class TimeSeriesLocked {};
-		class UnrecognizedTimeSeriesType {};
+		class UnrecognizedTimeSeriesType {
+			public:
+				unsigned int type;
+				UnrecognizedTimeSeriesType(unsigned int etype);
+		};
 		class InvalidRootDirectory {
 			public:
 				std::string reason;
 				InvalidRootDirectory(std::string errreason);
+		};
+		class InvalidInvocation {
+			public:
+				std::string reason;
+				InvalidInvocation(std::string errreason);
 		};
 	};
 };

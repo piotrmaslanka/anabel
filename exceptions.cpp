@@ -20,3 +20,9 @@
 Anabel::Exceptions::InvalidRootDirectory::InvalidRootDirectory(std::string errreason) {
 	this->reason = errreason;
 };
+Anabel::Exceptions::InvalidInvocation::InvalidInvocation(std::string errreason) {
+	this->reason = errreason;
+};
+Anabel::Exceptions::UnrecognizedTimeSeriesType::UnrecognizedTimeSeriesType(unsigned int etype) {
+	this->type = etype;
+}

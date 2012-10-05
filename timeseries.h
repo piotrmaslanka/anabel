@@ -20,23 +20,29 @@
 #include <boost/filesystem.hpp>
 
 namespace Anabel {
-
 	enum TimeSeriesType {
-		TST__GUARD_BOTTOM,		// don't move, this is a guard to check for surefire invalid timeseries directories
-
+		TST_UNUSABLE,
 		TST_INT32,
+		_TST_GUARD_MAX,	// don't move - this is in itself an invalid type
+	};
 
-		TST__GUARD_TOP,			// don't move, this is a guard to check for surefire invalid timeseries directories
+	enum TimeSeriesOpenMode {
+		TSO_CLOSED,
+		TSO_READ,
+		TSO_APPEND,
+		TSO_REBALANCE,
+		TSO_WRITE,
 	};
 
 	class TimeSeries {
 		private:
-			bool write_available;
-			boost::interprocess::file_lock * flock;
+			boost::interprocess::file_lock * alock;
+			boost::interprocess::file_lock * block;
 			boost::filesystem::path * root_path;
 		public:
+			TimeSeriesOpenMode mode;
 			TimeSeriesType type;
-			TimeSeries(std::string rdpath, bool allow_write=false, bool wait_if_locked=false);
+			TimeSeries(std::string rootdirpath, TimeSeriesOpenMode open_mode);
 			~TimeSeries();
 	};
 };

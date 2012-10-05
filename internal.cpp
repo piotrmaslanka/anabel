@@ -30,7 +30,7 @@ vector<Timestamp> examine_directory(path directory) {
 
 	vector<Timestamp> files;
 
-	long long temp;
+	Timestamp temp;
 
 	for (vector<path>::iterator iter = files_p.begin(); iter != files_p.end(); iter++) {
 		try {
@@ -40,7 +40,7 @@ vector<Timestamp> examine_directory(path directory) {
 		} catch(...) {}
 	}
 
-	sort(files.begin(), files.end(), std::greater<long long>());
+	sort(files.begin(), files.end(), greater<Timestamp>());
 
 	return files;
 }
@@ -48,12 +48,7 @@ vector<Timestamp> examine_directory(path directory) {
 vector<string> Anabel::Internal::inquire_files(TimeSeries * timeseries, Timestamp from, Timestamp to) {
 	vector<string> vec;
 
-	time_t now;
-
-
-
-
-	
+	time_t now_t = time(NULL);	// get current UTC time
 
 	return vec;
 }
