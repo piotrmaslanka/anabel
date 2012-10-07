@@ -1,20 +1,11 @@
 #include <iostream>
 #include <anabel/anabel.h>
-#include <ctime>
-
-using namespace Anabel;
+#include <vector>
+using namespace std;
 
 int main() {
-
-	time_t now_t = time(NULL);
-
-	std::cout << "Obecne godziny: " << (now_t % 86400)/3600 << std::endl;
-
+	Anabel::TimeSeries timeseries("d:\\mirabelka", Anabel::TSO_READ);
+	Anabel::ReadQuery * rq = timeseries.get_query(0, 1000);
+	
 	system("pause");
-
-	TimeSeries * ts = new TimeSeries("d:/mirabelka", true);
-	delete ts;
-
-	system("pause");
-
 }

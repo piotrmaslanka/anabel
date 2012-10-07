@@ -18,10 +18,127 @@
 #include "timeseries.h"
 #include "exceptions.h"
 #include <fstream>
+#include <algorithm>
+#include <deque>
+#include <boost/utility.hpp>
 
 using namespace boost::filesystem;
 using namespace boost::interprocess;
 using namespace Anabel::Exceptions;
+using namespace std;
+using namespace Anabel;
+
+inline Timestamp string_to_timestamp(string str) {
+	std::stringstream s(str);
+	Timestamp t;
+	s >> t;
+	return t;
+}
+inline string timestamp_to_string(Timestamp timestamp) {
+	std::stringstream s;
+	s << timestamp;
+	return s.str();
+}
+
+/**
+* Scans a directory, returning a vector of timestamp-objects found inside
+*/
+vector<Timestamp> scan_directory(path directory) {
+	vector<path> files_p;
+	copy(directory_iterator(directory), directory_iterator(), back_inserter(files_p));
+	vector<Timestamp> files;
+
+	for (vector<path>::iterator iter = files_p.begin(); iter != files_p.end(); iter++)
+		try {
+			files.push_back(string_to_timestamp(iter->filename().string()));
+		} catch(...) {}
+
+	return files;
+}
+/**
+* Chooses a timestamp that can be chosen, so it contains needle.
+* 
+* Haystack must not be empty - other way, it would not make any sense, would it?
+* Haystack must contain entry that will follow us to needle.
+*/
+Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
+	for (unsigned i=0; i<haystack.size(); i++) {
+		if (needle <= haystack[i]) return haystack[i];
+	}
+	throw InternalError("needle not found");
+}
+
+Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) {
+	// Sanity checks
+	if (this->type == TST_UNUSABLE) throw InvalidInvocation("time series has unusable type");
+	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
+
+	typedef vector<Timestamp> timevector;
+	typedef vector<Timestamp>::iterator timevectoriter;
+
+	// Init variables
+	path cpath = *this->root_path;
+	timevector elements;
+	Timestamp choice;
+	Anabel::ReadQuery * rq = new ReadQuery();
+	rq->files = new deque<path>();
+	rq->start = from;
+	rq->stop = to;
+
+	// Locate LBA
+	cpath = *this->root_path;
+	try {
+		while (is_directory(cpath)) {
+			elements = scan_directory(cpath);
+			sort(elements.begin(), elements.end());
+			choice = choose(elements, from);
+			cpath /= timestamp_to_string(choice);
+		}
+	} catch (InternalError e) {
+		// query empty.
+		return rq;
+	}
+
+	rq->files->push_back(cpath);
+
+	// Now we will trace thru the filesystem, finding doodz. First up the tree, and then descent.
+
+	while (true) {
+		path cpath_parent(cpath.parent_path());
+		Timestamp cpath_filename_t = string_to_timestamp(cpath.filename().string());
+
+		elements = scan_directory(cpath_parent);
+		sort(elements.begin(), elements.end(), greater<Timestamp>());
+
+		timevectoriter bound = upper_bound(elements.begin(), elements.end(), to, greater<Timestamp>());
+		if (bound != elements.end()) {  // we need this check - last element may be the one we are looking for. If it is, we'll trace it later.
+			timevector temptrace;
+			for (timevectoriter iter = bound; *iter>cpath_filename_t; iter++) temptrace.push_back(*iter);
+			for (timevectoriter iter = temptrace.begin(); iter<temptrace.end(); iter++)
+				rq->files->push_front(cpath_parent / timestamp_to_string(*iter));
+		}
+
+		if (bound==elements.begin()) { // we have to examine the parent directory 
+			cpath = cpath.parent_path();
+		} else {
+			bound--;	// bound is object we should examine now
+			cpath = cpath_parent / timestamp_to_string(*bound);
+			if (is_regular_file(cpath)) {
+				rq->files->push_front(cpath);		// UBA file found
+				cout << cpath.string() << " is a regular file" << endl;
+				break;
+			}
+			// this is not a real file. we will use a "fake" file to force the algoritm to work properly with a bound
+			cpath /= timestamp_to_string(to);	// kinda faking a file, but algorithm doesn't care
+		}
+	}
+
+	cout << "[DEBUG] Tracing: " << endl;
+	for (deque<path>::iterator iter = rq->files->begin(); iter<rq->files->end(); iter++)
+		cout << iter->string() << endl;
+
+	return rq;
+}
 
 Anabel::TimeSeries::TimeSeries(std::string rootdirpath, Anabel::TimeSeriesOpenMode open_mode) {
 	this->mode = TSO_CLOSED;
@@ -43,8 +160,8 @@ Anabel::TimeSeries::TimeSeries(std::string rootdirpath, Anabel::TimeSeriesOpenMo
 	if (!exists(block_path)) throw InvalidRootDirectory("rebalance lock not found");
 
 	// Create locks
-	this->alock = new boost::interprocess::file_lock(alock_path.string());
-	this->block = new boost::interprocess::file_lock(block_path.string());
+	this->alock = new boost::interprocess::file_lock(alock_path.string().c_str());
+	this->block = new boost::interprocess::file_lock(block_path.string().c_str());
 	
 	// Do the locking!
 	/*
@@ -108,12 +225,11 @@ Anabel::TimeSeries::TimeSeries(std::string rootdirpath, Anabel::TimeSeriesOpenMo
 	conf.close();
 
 	// Verify validity and save to class
-	if (ftype >= _TST_GUARD_MAX) throw UnrecognizedTimeSeriesType(ftype);
+	if (ftype >= _TST_GUARD_MAX) ftype = TST_UNUSABLE;
 	this->type = (Anabel::TimeSeriesType)ftype;
 
 	// The class is good to go.
 }
-
 Anabel::TimeSeries::~TimeSeries() {
 	switch (this->mode) {
 		case TSO_READ:

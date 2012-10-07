@@ -15,6 +15,7 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+#pragma once
 #include <iostream>
 
 namespace Anabel {
@@ -34,6 +35,11 @@ namespace Anabel {
 			public:
 				std::string reason;
 				InvalidInvocation(std::string errreason);
+		};
+		class InternalError {
+			public:
+				std::string reason;
+				InternalError(std::string errreason);
 		};
 	};
 };

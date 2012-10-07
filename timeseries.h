@@ -15,9 +15,13 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+#pragma once
 #include <iostream>
+#include <vector>
+#include <deque>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/filesystem.hpp>
+#include "anabel/anabel.h"
 
 namespace Anabel {
 	enum TimeSeriesType {
@@ -34,6 +38,14 @@ namespace Anabel {
 		TSO_WRITE,
 	};
 
+	class ReadQuery {
+		friend class TimeSeries;
+		private:
+			Anabel::Timestamp start;
+			Anabel::Timestamp stop;
+			std::deque<boost::filesystem::path> * files;
+	};
+
 	class TimeSeries {
 		private:
 			boost::interprocess::file_lock * alock;
@@ -44,5 +56,6 @@ namespace Anabel {
 			TimeSeriesType type;
 			TimeSeries(std::string rootdirpath, TimeSeriesOpenMode open_mode);
 			~TimeSeries();
+			ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
 	};
 };

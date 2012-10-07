@@ -20,10 +20,12 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include <anabel/exceptions.h>
-#include <anabel/timeseries.h>
+#pragma once
 
 namespace Anabel {
 	typedef long long Timestamp;
 };
+
+#include <anabel/exceptions.h>
+#include <anabel/timeseries.h>
 
