@@ -101,9 +101,12 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 
 	rq->files->push_back(cpath);
 
-	// Now we will trace thru the filesystem, finding doodz. First up the tree, and then descent.
+	// Now we will trace thru the filesystem, finding doodz. First up the tree, and then sharp dive towards 'to'
 
 	while (true) {
+		//
+		//		TODO: Could I append in such a way NOT to require a deque?
+		//
 		path cpath_parent(cpath.parent_path());
 		Timestamp cpath_filename_t = string_to_timestamp(cpath.filename().string());
 
@@ -140,29 +143,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	return rq;
 }
 
-Anabel::TimeSeries::TimeSeries(std::string rootdirpath, Anabel::TimeSeriesOpenMode open_mode) {
-	this->mode = TSO_CLOSED;
-	this->type = TST_UNUSABLE;
-	// Prepare pathes
-	this->root_path = new path(rootdirpath);
-	path conf_path(*this->root_path);
-	conf_path /= "conf";
-	path alock_path(*this->root_path);
-	alock_path /= "alock";
-	path block_path(*this->root_path);
-	block_path /= "block";
-
-	// Sanity-check pathes
-	if (!exists(*this->root_path)) throw InvalidRootDirectory("root directory does not exist");
-	if (!is_directory(*this->root_path)) throw InvalidRootDirectory("root directory is not a directory");
-	if (!exists(conf_path)) throw InvalidRootDirectory("conf file not found");
-	if (!exists(alock_path)) throw InvalidRootDirectory("append lock not found");
-	if (!exists(block_path)) throw InvalidRootDirectory("rebalance lock not found");
-
-	// Create locks
-	this->alock = new boost::interprocess::file_lock(alock_path.string().c_str());
-	this->block = new boost::interprocess::file_lock(block_path.string().c_str());
-	
+void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	// Do the locking!
 	/*
 		Now, how do I resolve deadlocks? They may happen.
@@ -211,26 +192,26 @@ Anabel::TimeSeries::TimeSeries(std::string rootdirpath, Anabel::TimeSeriesOpenMo
 			}
 			break;
 		case TSO_CLOSED:	// funnt, not undefined though
-			return;
+			throw InvalidInvocation("invalid open_mode");
 			break;
 		default:
 			throw InvalidInvocation("unknown open_mode");
 	}
-	this->mode = open_mode;
 
-	// Read type of time series
-	std::ifstream conf(conf_path.string());
+	// Read type of time series, as we don't know it now
+	std::ifstream conf((*this->root_path / "conf").string());
 	unsigned int ftype;
 	conf >> ftype;
 	conf.close();
 
-	// Verify validity and save to class
+	// Verify validity
 	if (ftype >= _TST_GUARD_MAX) ftype = TST_UNUSABLE;
-	this->type = (Anabel::TimeSeriesType)ftype;
 
-	// The class is good to go.
+	this->type = (Anabel::TimeSeriesType)ftype;
+	this->mode = open_mode;
 }
-Anabel::TimeSeries::~TimeSeries() {
+
+void Anabel::TimeSeries::close(void) {
 	switch (this->mode) {
 		case TSO_READ:
 			this->alock->unlock_sharable();
@@ -249,7 +230,39 @@ Anabel::TimeSeries::~TimeSeries() {
 		case TSO_CLOSED:
 			break;
 	}
+}
+
+
+Anabel::TimeSeries::TimeSeries(std::string rootdirpath) {
+	this->mode = TSO_CLOSED;
+	this->type = TST_UNUSABLE;
+	// Prepare pathes
+	this->root_path = new path(rootdirpath);
+	path conf_path(*this->root_path);
+	conf_path /= "conf";
+	path alock_path(*this->root_path);
+	alock_path /= "alock";
+	path block_path(*this->root_path);
+	block_path /= "block";
+
+	// Sanity-check pathes
+	if (!exists(*this->root_path)) throw InvalidRootDirectory("root directory does not exist");
+	if (!is_directory(*this->root_path)) throw InvalidRootDirectory("root directory is not a directory");
+	if (!exists(conf_path)) throw InvalidRootDirectory("conf file not found");
+	if (!exists(alock_path)) throw InvalidRootDirectory("append lock not found");
+	if (!exists(block_path)) throw InvalidRootDirectory("rebalance lock not found");
+
+	// Create locks
+	this->alock = new boost::interprocess::file_lock(alock_path.string().c_str());
+	this->block = new boost::interprocess::file_lock(block_path.string().c_str());
+}
+Anabel::TimeSeries::~TimeSeries() {
+	if (this->mode != TSO_CLOSED) this->close();
 	delete this->alock;
 	delete this->block;
 	delete this->root_path;
+}
+
+Anabel::ReadQuery::~ReadQuery() {
+	delete this->files;
 }

@@ -44,6 +44,8 @@ namespace Anabel {
 			Anabel::Timestamp start;
 			Anabel::Timestamp stop;
 			std::deque<boost::filesystem::path> * files;
+		public:
+			~ReadQuery();
 	};
 
 	class TimeSeries {
@@ -52,10 +54,12 @@ namespace Anabel {
 			boost::interprocess::file_lock * block;
 			boost::filesystem::path * root_path;
 		public:
-			TimeSeriesOpenMode mode;
-			TimeSeriesType type;
-			TimeSeries(std::string rootdirpath, TimeSeriesOpenMode open_mode);
+			TimeSeriesOpenMode mode; // don't modify from userland
+			TimeSeriesType type;     // don't modify from userland
+			TimeSeries(std::string rootdirpath);
 			~TimeSeries();
 			ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
+			void open(TimeSeriesOpenMode open_mode);
+			void close(void);
 	};
 };
