@@ -7,7 +7,7 @@ int main() {
 	Anabel::TimeSeries timeseries("d:\\mirabelka");
 	timeseries.open(Anabel::TSO_READ);
 
-	timeseries.get_query(10, 8000);
+	timeseries.get_query(10, 800);
 
 	system("pause");
 }

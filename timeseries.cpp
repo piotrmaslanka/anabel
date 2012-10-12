@@ -28,9 +28,10 @@ using namespace std;
 using namespace Anabel;
 
 inline Timestamp string_to_timestamp(string str) {
-	std::stringstream s(str);
+	std::istringstream s(str);
 	Timestamp t;
 	s >> t;
+	if (!s.eof()) throw 1; // we haven't consumed all the string, it means that it was not a number
 	return t;
 }
 inline string timestamp_to_string(Timestamp timestamp) {
@@ -62,7 +63,7 @@ vector<Timestamp> scan_directory(path directory) {
 */
 Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 	for (unsigned i=0; i<haystack.size(); i++) {
-		if (needle <= haystack[i]) return haystack[i];
+		if (haystack[i] <= needle) return haystack[i];
 	}
 	throw InternalError("needle not found");
 }
@@ -81,13 +82,13 @@ void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp t
 	Timestamp choice;
 	vector<path> * files = new vector<path>();
 
-	// Locate LBA
+	// Locate UBA
 	cpath = *this->root_path;
 	try {
 		while (is_directory(cpath)) {
 			elements = scan_directory(cpath);
-			sort(elements.begin(), elements.end());
-			choice = choose(elements, from);
+			sort(elements.begin(), elements.end(), greater<Timestamp>());
+			choice = choose(elements, to);
 			cpath /= timestamp_to_string(choice);
 		}
 	} catch (InternalError e) {
@@ -105,24 +106,27 @@ void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp t
 		Timestamp cpath_filename_t = string_to_timestamp(cpath.filename().string());
 
 		elements = scan_directory(cpath_parent);
-		sort(elements.begin(), elements.end(), greater<Timestamp>());
+		sort(elements.begin(), elements.end());
 
-		timevectoriter bound = upper_bound(elements.begin(), elements.end(), to, greater<Timestamp>());
-		if (bound != elements.end())   // we need this check - last element may be the one we are looking for. If it is, we'll trace it later.
-			for (timevectoriter iter = bound; *iter>cpath_filename_t; iter++)
-				files->push_back(cpath_parent / timestamp_to_string(*iter));
+		timevectoriter bound = upper_bound(elements.begin(), elements.end(), from);
+
+		for (timevectoriter iter = bound; *iter<cpath_filename_t; iter++)
+			files->push_back(cpath_parent / timestamp_to_string(*iter));
 
 		if (bound==elements.begin()) { // we have to examine the parent directory 
 			cpath = cpath.parent_path();
 		} else {
-			bound--;	// bound is object we should examine now
+			bound--;
 			cpath = cpath_parent / timestamp_to_string(*bound);
 			if (is_regular_file(cpath)) {
-				files->push_back(cpath);		// UBA file found
+				for (timevectoriter iter = elements.end()-1; iter >= bound; iter--) {
+					files->push_back(cpath_parent / timestamp_to_string(*iter));		// LBA file found, we need to finish iterating this directory
+					if (iter == elements.begin()) break;
+				}
 				break;
 			}
 			// this is not a real file. we will use a "fake" file to force the algoritm to work properly with a bound
-			cpath /= timestamp_to_string(to);	// kinda faking a file, but algorithm doesn't care
+			cpath /= timestamp_to_string(from);	// kinda faking a file, but algorithm doesn't care
 		}
 	}
 
