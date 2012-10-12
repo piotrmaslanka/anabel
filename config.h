@@ -18,5 +18,5 @@
 #pragma once
 namespace Anabel {
 	typedef long long Timestamp;
-	extern unsigned TYPE_SIZE;
+	extern unsigned TYPE_SIZE[];
 }

@@ -23,13 +23,29 @@ namespace Anabel {
 	class ReadQuery {
 		friend class TimeSeries;
 		private:
+			class IntelligentFileReader: public std::ifstream {
+				private:
+					long long start_at_ofs;
+					long long end_at_ofs;
+					int record_size;
+				public:
+					IntelligentFileReader(boost::filesystem::path path, int record_size);
+					void limit_start(Anabel::Timestamp start);
+					void limit_end(Anabel::Timestamp end);
+					unsigned get_data(unsigned bytes_to_read, void * buffer);
+			};
+
 			Anabel::Timestamp from, to;
 			TimeSeriesType type;
 			std::vector<boost::filesystem::path> * files;
+			IntelligentFileReader * opened_file;			
 			void * data_cache;
 			unsigned cache_entries;
 			unsigned desired_cache_size;
+			bool first_readed;
 			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> * files, Anabel::TimeSeriesType type);
+
+			void prime_cache(void);
 		public:
 			void set_desired_cache_size(unsigned elements);
 			unsigned get_data(unsigned count, void * buffer);
