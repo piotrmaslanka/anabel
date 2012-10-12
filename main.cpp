@@ -1,6 +1,7 @@
 #include <iostream>
 #include <anabel/anabel.h>
 #include <vector>
+#include <boost/filesystem.hpp>
 using namespace std;
 
 int main() {

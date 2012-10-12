@@ -27,5 +27,6 @@ namespace Anabel {
 #include <anabel/exceptions.h>
 #include <anabel/timeseries.h>
 #include <anabel/readquery.h>
+#include <anabel/fsobjects.h>
 
 

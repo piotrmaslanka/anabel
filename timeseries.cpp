@@ -26,35 +26,7 @@ using namespace boost::interprocess;
 using namespace Anabel::Exceptions;
 using namespace std;
 using namespace Anabel;
-
-inline Timestamp string_to_timestamp(string str) {
-	std::istringstream s(str);
-	Timestamp t;
-	s >> t;
-	if (!s.eof()) throw 1; // we haven't consumed all the string, it means that it was not a number
-	return t;
-}
-inline string timestamp_to_string(Timestamp timestamp) {
-	std::stringstream s;
-	s << timestamp;
-	return s.str();
-}
-
-/**
-* Scans a directory, returning a vector of timestamp-objects found inside
-*/
-vector<Timestamp> scan_directory(path directory) {
-	vector<path> files_p;
-	copy(directory_iterator(directory), directory_iterator(), back_inserter(files_p));
-	vector<Timestamp> files;
-
-	for (vector<path>::iterator iter = files_p.begin(); iter != files_p.end(); iter++)
-		try {
-			files.push_back(string_to_timestamp(iter->filename().string()));
-		} catch(...) {}
-
-	return files;
-}
+using namespace Anabel::Internal;
 /**
 * Chooses a timestamp that can be chosen, so it contains needle.
 * 
@@ -130,7 +102,7 @@ void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp t
 	}
 
 	cout << "[DEBUG] Tracing: " << endl;
-	for (vector<path>::iterator iter = files->begin(); iter<files->end(); iter++)
+	for (vector<path>::iterator iter = files->begin(); iter != files->end(); iter++)
 		cout << iter->string() << endl;
 
 	return new Anabel::ReadQuery(from, to, files, this->record_size);
