@@ -24,7 +24,7 @@ void Anabel::ReadQuery::prime_cache(void) {
 	if (opened_file == NULL) {
 		if (this->files->size() == 0) return;		// nothing to do
 		// open new file
-		this->opened_file = new IntelligentFileReader(this->files->back(), Anabel::TYPE_SIZE[this->type]);
+		this->opened_file = new IntelligentFileReader(this->files->back(), this->record_size);
 		this->files->pop_back();
 
 	}
@@ -48,8 +48,8 @@ void Anabel::ReadQuery::IntelligentFileReader::limit_start(Anabel::Timestamp sta
 void Anabel::ReadQuery::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {}
 unsigned Anabel::ReadQuery::IntelligentFileReader::get_data(unsigned bytes_to_read, void * buffer) {};
 
-Anabel::ReadQuery::ReadQuery(Timestamp from, Timestamp to, std::vector<boost::filesystem::path> * files, TimeSeriesType type) : from(from), to(to), 
-																																files(files), type(type),
+Anabel::ReadQuery::ReadQuery(Timestamp from, Timestamp to, std::vector<boost::filesystem::path> * files, int record_size) : from(from), to(to), 
+																																files(files), record_size(record_size),
 																																first_readed(true),
 																																opened_file(NULL), data_cache(NULL),																																
 																																desired_cache_size(20000) {

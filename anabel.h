@@ -21,7 +21,9 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #pragma once
-#include <anabel/config.h>
+namespace Anabel {
+	typedef unsigned long long Timestamp;
+};
 #include <anabel/exceptions.h>
 #include <anabel/timeseries.h>
 #include <anabel/readquery.h>

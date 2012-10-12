@@ -36,14 +36,14 @@ namespace Anabel {
 			};
 
 			Anabel::Timestamp from, to;
-			TimeSeriesType type;
+			int record_size;
 			std::vector<boost::filesystem::path> * files;
 			IntelligentFileReader * opened_file;			
 			void * data_cache;
 			unsigned cache_entries;
 			unsigned desired_cache_size;
 			bool first_readed;
-			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> * files, Anabel::TimeSeriesType type);
+			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> * files, int record_size);
 
 			void prime_cache(void);
 		public:

@@ -21,11 +21,6 @@
 namespace Anabel {
 	namespace Exceptions {
 		class TimeSeriesLocked {};
-		class UnrecognizedTimeSeriesType {
-			public:
-				unsigned int type;
-				UnrecognizedTimeSeriesType(unsigned int etype);
-		};
 		class InvalidRootDirectory {
 			public:
 				std::string reason;

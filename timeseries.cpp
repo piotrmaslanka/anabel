@@ -70,7 +70,6 @@ Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 
 void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) {
 	// Sanity checks
-	if (this->type == TST_UNUSABLE) throw InvalidInvocation("time series has unusable type");
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 
 	typedef vector<Timestamp> timevector;
@@ -94,7 +93,7 @@ void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp t
 	} catch (InternalError e) {
 		// query empty.
 		delete files;
-		return new Anabel::ReadQuery(from, to, NULL, this->type);
+		return new Anabel::ReadQuery(from, to, NULL, this->record_size);
 	}
 
 	files->push_back(cpath);
@@ -134,7 +133,7 @@ void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp t
 	for (vector<path>::iterator iter = files->begin(); iter<files->end(); iter++)
 		cout << iter->string() << endl;
 
-	return new Anabel::ReadQuery(from, to, files, this->type);
+	return new Anabel::ReadQuery(from, to, files, this->record_size);
 }
 
 void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
@@ -193,15 +192,10 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	}
 
 	// Read type of time series, as we don't know it now
-	std::ifstream conf((*this->root_path / "conf").string());
-	unsigned int ftype;
-	conf >> ftype;
+	std::ifstream conf((*this->root_path / "record_size").string());
+	conf >> this->record_size;
 	conf.close();
 
-	// Verify validity
-	if (ftype >= _TST_GUARD_MAX) ftype = TST_UNUSABLE;
-
-	this->type = (Anabel::TimeSeriesType)ftype;
 	this->mode = open_mode;
 }
 
@@ -227,13 +221,11 @@ void Anabel::TimeSeries::close(void) {
 }
 
 
-Anabel::TimeSeries::TimeSeries(std::string rootdirpath) {
-	this->mode = TSO_CLOSED;
-	this->type = TST_UNUSABLE;
+Anabel::TimeSeries::TimeSeries(std::string rootdirpath) : mode(TSO_CLOSED), record_size(0) {
 	// Prepare pathes
 	this->root_path = new path(rootdirpath);
-	path conf_path(*this->root_path);
-	conf_path /= "conf";
+	path rsize_path(*this->root_path);
+	rsize_path /= "record_size";
 	path alock_path(*this->root_path);
 	alock_path /= "alock";
 	path block_path(*this->root_path);
@@ -242,7 +234,7 @@ Anabel::TimeSeries::TimeSeries(std::string rootdirpath) {
 	// Sanity-check pathes
 	if (!exists(*this->root_path)) throw InvalidRootDirectory("root directory does not exist");
 	if (!is_directory(*this->root_path)) throw InvalidRootDirectory("root directory is not a directory");
-	if (!exists(conf_path)) throw InvalidRootDirectory("conf file not found");
+	if (!exists(rsize_path)) throw InvalidRootDirectory("rsize_path file not found");
 	if (!exists(alock_path)) throw InvalidRootDirectory("append lock not found");
 	if (!exists(block_path)) throw InvalidRootDirectory("rebalance lock not found");
 

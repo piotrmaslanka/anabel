@@ -22,13 +22,6 @@
 #include <boost/filesystem.hpp>
 
 namespace Anabel {
-
-	enum TimeSeriesType {
-		TST_UNUSABLE,
-		TST_INT32,
-		_TST_GUARD_MAX,	// don't move - this is in itself an invalid type
-	};
-
 	enum TimeSeriesOpenMode {
 		TSO_CLOSED,
 		TSO_READ,
@@ -42,10 +35,9 @@ namespace Anabel {
 			boost::interprocess::file_lock * alock;
 			boost::interprocess::file_lock * block;
 			boost::filesystem::path * root_path;
-
 		public:
+			int record_size;
 			TimeSeriesOpenMode mode; // don't modify from userland
-			TimeSeriesType type;     // don't modify from userland
 			TimeSeries(std::string rootdirpath);
 			~TimeSeries();
 			void * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
