@@ -15,9 +15,8 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include "timeseries.h"
-#include "exceptions.h"
 #include <fstream>
+#include <anabel/anabel.h>
 #include <algorithm>
 #include <deque>
 #include <boost/utility.hpp>
@@ -68,7 +67,7 @@ Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 	throw InternalError("needle not found");
 }
 
-Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) {
+void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) {
 	// Sanity checks
 	if (this->type == TST_UNUSABLE) throw InvalidInvocation("time series has unusable type");
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
@@ -80,10 +79,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	path cpath = *this->root_path;
 	timevector elements;
 	Timestamp choice;
-	Anabel::ReadQuery * rq = new ReadQuery();
-	rq->files = new deque<path>();
-	rq->start = from;
-	rq->stop = to;
+	vector<path> * files = new vector<path>();
 
 	// Locate LBA
 	cpath = *this->root_path;
@@ -96,17 +92,15 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		}
 	} catch (InternalError e) {
 		// query empty.
-		return rq;
+		delete files;
+		return new Anabel::ReadQuery(from, to, NULL, this->type);
 	}
 
-	rq->files->push_back(cpath);
+	files->push_back(cpath);
 
 	// Now we will trace thru the filesystem, finding doodz. First up the tree, and then sharp dive towards 'to'
 
 	while (true) {
-		//
-		//		TODO: Could I append in such a way NOT to require a deque?
-		//
 		path cpath_parent(cpath.parent_path());
 		Timestamp cpath_filename_t = string_to_timestamp(cpath.filename().string());
 
@@ -114,12 +108,9 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		sort(elements.begin(), elements.end(), greater<Timestamp>());
 
 		timevectoriter bound = upper_bound(elements.begin(), elements.end(), to, greater<Timestamp>());
-		if (bound != elements.end()) {  // we need this check - last element may be the one we are looking for. If it is, we'll trace it later.
-			timevector temptrace;
-			for (timevectoriter iter = bound; *iter>cpath_filename_t; iter++) temptrace.push_back(*iter);
-			for (timevectoriter iter = temptrace.begin(); iter<temptrace.end(); iter++)
-				rq->files->push_front(cpath_parent / timestamp_to_string(*iter));
-		}
+		if (bound != elements.end())   // we need this check - last element may be the one we are looking for. If it is, we'll trace it later.
+			for (timevectoriter iter = bound; *iter>cpath_filename_t; iter++)
+				files->push_back(cpath_parent / timestamp_to_string(*iter));
 
 		if (bound==elements.begin()) { // we have to examine the parent directory 
 			cpath = cpath.parent_path();
@@ -127,8 +118,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 			bound--;	// bound is object we should examine now
 			cpath = cpath_parent / timestamp_to_string(*bound);
 			if (is_regular_file(cpath)) {
-				rq->files->push_front(cpath);		// UBA file found
-				cout << cpath.string() << " is a regular file" << endl;
+				files->push_back(cpath);		// UBA file found
 				break;
 			}
 			// this is not a real file. we will use a "fake" file to force the algoritm to work properly with a bound
@@ -137,10 +127,10 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	}
 
 	cout << "[DEBUG] Tracing: " << endl;
-	for (deque<path>::iterator iter = rq->files->begin(); iter<rq->files->end(); iter++)
+	for (vector<path>::iterator iter = files->begin(); iter<files->end(); iter++)
 		cout << iter->string() << endl;
 
-	return rq;
+	return new Anabel::ReadQuery(from, to, files, this->type);
 }
 
 void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
@@ -261,8 +251,4 @@ Anabel::TimeSeries::~TimeSeries() {
 	delete this->alock;
 	delete this->block;
 	delete this->root_path;
-}
-
-Anabel::ReadQuery::~ReadQuery() {
-	delete this->files;
 }

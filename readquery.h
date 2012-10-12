@@ -16,40 +16,24 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #pragma once
-#include <iostream>
-#include <vector>
-#include <boost/interprocess/sync/file_lock.hpp>
+#include <anabel/timeseries.h>
 #include <boost/filesystem.hpp>
 
-namespace Anabel {
-
-	enum TimeSeriesType {
-		TST_UNUSABLE,
-		TST_INT32,
-		_TST_GUARD_MAX,	// don't move - this is in itself an invalid type
-	};
-
-	enum TimeSeriesOpenMode {
-		TSO_CLOSED,
-		TSO_READ,
-		TSO_APPEND,
-		TSO_REBALANCE,
-		TSO_WRITE,
-	};
-
-	class TimeSeries {
+namespace Anabel {	
+	class ReadQuery {
+		friend class TimeSeries;
 		private:
-			boost::interprocess::file_lock * alock;
-			boost::interprocess::file_lock * block;
-			boost::filesystem::path * root_path;
-
+			Anabel::Timestamp from, to;
+			TimeSeriesType type;
+			std::vector<boost::filesystem::path> * files;
+			void * data_cache;
+			unsigned cache_entries;
+			unsigned desired_cache_size;
+			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> * files, Anabel::TimeSeriesType type);
 		public:
-			TimeSeriesOpenMode mode; // don't modify from userland
-			TimeSeriesType type;     // don't modify from userland
-			TimeSeries(std::string rootdirpath);
-			~TimeSeries();
-			void * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
-			void open(TimeSeriesOpenMode open_mode);
-			void close(void);
+			void set_desired_cache_size(unsigned elements);
+			unsigned get_data(unsigned count, void * buffer);
+			~ReadQuery();
+
 	};
 };

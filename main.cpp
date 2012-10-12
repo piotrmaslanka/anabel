@@ -6,7 +6,8 @@ using namespace std;
 int main() {
 	Anabel::TimeSeries timeseries("d:\\mirabelka");
 	timeseries.open(Anabel::TSO_READ);
-	Anabel::ReadQuery * rq = timeseries.get_query(0, 1000);
+
+	timeseries.get_query(10, 8000);
 
 	system("pause");
 }

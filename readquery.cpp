@@ -15,31 +15,12 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#pragma once
-#include <iostream>
-
-namespace Anabel {
-	namespace Exceptions {
-		class TimeSeriesLocked {};
-		class UnrecognizedTimeSeriesType {
-			public:
-				unsigned int type;
-				UnrecognizedTimeSeriesType(unsigned int etype);
-		};
-		class InvalidRootDirectory {
-			public:
-				std::string reason;
-				InvalidRootDirectory(std::string errreason);
-		};
-		class InvalidInvocation {
-			public:
-				std::string reason;
-				InvalidInvocation(std::string errreason);
-		};
-		class InternalError {
-			public:
-				std::string reason;
-				InternalError(std::string errreason);
-		};
-	};
-};
+#include <anabel/anabel.h>
+void Anabel::ReadQuery::set_desired_cache_size(unsigned elements) { this->desired_cache_size = elements; }
+Anabel::ReadQuery::ReadQuery(Timestamp from, Timestamp to, std::vector<boost::filesystem::path> * files, TimeSeriesType type) : from(from), to(to), 
+																																files(files), type(type),
+																																desired_cache_size(20000) {};
+Anabel::ReadQuery::~ReadQuery() {
+	if (this->cache_entries > 0) free(this->data_cache);
+	delete this->files;
+}
