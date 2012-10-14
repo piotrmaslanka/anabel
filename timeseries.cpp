@@ -77,12 +77,13 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	while (true) {
 		elements = scan_directory(cpath);
 		sort(elements.begin(), elements.end(), std::greater<Timestamp>());
-		timevectoriter bound = upper_bound(elements.begin(), elements.end(), from, std::greater<Timestamp>());
+		timevectoriter bound = lower_bound(elements.begin(), elements.end(), from, std::greater<Timestamp>());
 
 		if (bound == elements.end()) {	// we need to ascend
 			// index files from bound upwards
 			for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != elements.end(); start_bound++) {
 				if (previous_choice == *start_bound) continue;
+				previous_choice = *start_bound;
 				files->push_back(cpath / timestamp_to_string(*start_bound));
 			}
 			cpath = cpath.parent_path();
@@ -92,6 +93,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		// Descent to "bound"
 		for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != bound; start_bound++) {
 			if (previous_choice == *start_bound) continue;
+			previous_choice = *start_bound;
 			files->push_back(cpath / timestamp_to_string(*start_bound));
 		}
 
