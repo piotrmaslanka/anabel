@@ -57,18 +57,18 @@ Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem
 	this->end_at_ofs = (unsigned)(this->tellg());		// end of file
 	this->seekg(8, std::ios::beg);	// skip the header
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
+	this->total_records = this->records_remaining;
 
 }
 
 unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time) {
 	Anabel::Timestamp temp;
-	unsigned records = this->records_remaining;
 	unsigned imin = 0;
-	unsigned imax = this->records_remaining - 1;
+	unsigned imax = this->total_records - 1;
 	unsigned imid;
 	while (imax >= imin) {
 		imid = imin + (imax-imin)/2;
-		this->seekg(8+imid*(8+this->record_size));
+		this->seekg(8+imid*(8+this->record_size), std::ios::beg);
 		this->read((char*)(&temp), 8);
 		if (temp < time)
 			imin = imid + 1;
@@ -84,7 +84,6 @@ void Anabel::Internal::IntelligentFileReader::prepare_read(void) {
 }
 void Anabel::Internal::IntelligentFileReader::limit_start(Anabel::Timestamp start) {
 	this->start_at_ofs = this->locate(start)*(8+this->record_size) + 8;
-	this->seekg(this->start_at_ofs);
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {

@@ -35,6 +35,7 @@ namespace Anabel {
 					unsigned start_at_ofs;
 					unsigned end_at_ofs;
 					unsigned record_size;
+					unsigned total_records;
 					/**
 					* Returns index of record containing given value (or closest match)
 					*/
