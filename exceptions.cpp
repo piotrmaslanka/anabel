@@ -15,7 +15,8 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include "exceptions.h"
+#include <anabel/stdafx.h>
+#include <anabel/anabel.h>
 
 Anabel::Exceptions::InvalidRootDirectory::InvalidRootDirectory(std::string errreason) {
 	this->reason = errreason;

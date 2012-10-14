@@ -15,11 +15,8 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include <fstream>
+#include <anabel/stdafx.h>
 #include <anabel/anabel.h>
-#include <algorithm>
-#include <deque>
-#include <boost/utility.hpp>
 
 using namespace boost::filesystem;
 using namespace boost::interprocess;
@@ -40,7 +37,7 @@ Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 	throw InternalError("needle not found");
 }
 
-void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) {
+Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) {
 	// Sanity checks
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 
@@ -80,9 +77,10 @@ void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp t
 		sort(elements.begin(), elements.end());
 
 		timevectoriter bound = upper_bound(elements.begin(), elements.end(), from);
-
+		vector<path> temp;
 		for (timevectoriter iter = bound; *iter<cpath_filename_t; iter++)
-			files->push_back(cpath_parent / timestamp_to_string(*iter));
+			temp.push_back(cpath_parent / timestamp_to_string(*iter));
+		for (vector<path>::reverse_iterator iter = temp.rbegin(); iter != temp.rend(); iter++) files->push_back(*iter);
 
 		if (bound==elements.begin()) { // we have to examine the parent directory 
 			cpath = cpath.parent_path();
@@ -100,10 +98,6 @@ void * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp t
 			cpath /= timestamp_to_string(from);	// kinda faking a file, but algorithm doesn't care
 		}
 	}
-
-	cout << "[DEBUG] Tracing: " << endl;
-	for (vector<path>::iterator iter = files->begin(); iter != files->end(); iter++)
-		cout << iter->string() << endl;
 
 	return new Anabel::ReadQuery(from, to, files, this->record_size);
 }

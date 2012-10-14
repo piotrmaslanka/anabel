@@ -15,12 +15,8 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-
-#include <fstream>
+#include <anabel/stdafx.h>
 #include <anabel/anabel.h>
-#include <algorithm>
-#include <deque>
-#include <boost/utility.hpp>
 
 using namespace std;
 using namespace Anabel;
@@ -55,10 +51,11 @@ vector<Timestamp> Anabel::Internal::scan_directory(boost::filesystem::path direc
 	return files;
 }
 
-Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem::path path, int record_size) : record_size(record_size), start_at_ofs(8) {
-	this->open(path.string(), std::ios::in);
+Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem::path path, unsigned record_size) : record_size(record_size), start_at_ofs(8) {
+	std::cout << "Opening " << path.string() << std::endl;
+	this->open(path.string(), std::ios::binary);
 	this->seekg(0, std::ios::end);
-	this->end_at_ofs = (long long)(this->tellg());		// end of file
+	this->end_at_ofs = (unsigned)(this->tellg());		// end of file
 	this->seekg(8, std::ios::beg);	// skip the header
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 
@@ -83,8 +80,12 @@ unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time)
 	}
 	return imid;
 }
+void Anabel::Internal::IntelligentFileReader::prepare_read(void) {
+	this->seekg(this->start_at_ofs);
+}
 void Anabel::Internal::IntelligentFileReader::limit_start(Anabel::Timestamp start) {
 	this->start_at_ofs = this->locate(start)*(8+this->record_size) + 8;
+	this->seekg(this->start_at_ofs);
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {
@@ -99,7 +100,7 @@ unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_r
 	this->records_remaining -= records_to_read;
 
 	return records_to_read;
-};
+}
 
 // files are to be passed sorted descending
 Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesystem::path> * files) {
@@ -113,10 +114,15 @@ boost::filesystem::path Anabel::Internal::DirectoryIterator::next(void) {
 	boost::filesystem::path temp;
 	temp = this->state.front();
 	this->state.pop_front();
+	this->empty = (this->state.size() == 0);
 	while (is_directory(temp)) {
 		vector<Timestamp> stuff = scan_directory(temp);
 		sort(stuff.begin(), stuff.end());
 		for (vector<Timestamp>::reverse_iterator iter = stuff.rbegin(); iter != stuff.rend(); iter++) this->state.push_front(temp / timestamp_to_string(*iter));
+		temp = this->state.front();
+		this->state.pop_front();
+		this->empty = (this->state.size() == 0);
 	}
+	std::cout << " Picking " << temp.string() << std::endl;
 	return boost::filesystem::path(temp);
 }

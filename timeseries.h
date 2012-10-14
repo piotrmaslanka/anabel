@@ -16,10 +16,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #pragma once
-#include <iostream>
-#include <vector>
-#include <boost/interprocess/sync/file_lock.hpp>
-#include <boost/filesystem.hpp>
+#include <anabel/stdafx.h>
 
 namespace Anabel {
 	enum TimeSeriesOpenMode {
@@ -40,7 +37,7 @@ namespace Anabel {
 			TimeSeriesOpenMode mode; // don't modify from userland
 			TimeSeries(std::string rootdirpath);
 			~TimeSeries();
-			void * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
+			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
 			void open(TimeSeriesOpenMode open_mode);
 			void close(void);
 	};

@@ -16,10 +16,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #pragma once
-#include <deque>
-#include <vector>
-#include <fstream>
-#include <anabel/anabel.h>
+#include <anabel/stdafx.h>
 
 namespace Anabel {
 	namespace Internal {
@@ -35,18 +32,19 @@ namespace Anabel {
 
 			class IntelligentFileReader: public std::ifstream {
 				private:
-					long long start_at_ofs;
-					long long end_at_ofs;
-					int record_size;
-					int records_remaining;
+					unsigned start_at_ofs;
+					unsigned end_at_ofs;
+					unsigned record_size;
 					/**
 					* Returns index of record containing given value (or closest match)
 					*/
 					unsigned locate(Anabel::Timestamp time);
 				public:
-					IntelligentFileReader(boost::filesystem::path path, int record_size);
-					void limit_start(Anabel::Timestamp start);			// cannot be called if get_data was already invoked
-					void limit_end(Anabel::Timestamp end);				// cannot be called if get_data was already invoked
+					unsigned records_remaining;
+					IntelligentFileReader(boost::filesystem::path path, unsigned record_size);
+					void limit_start(Anabel::Timestamp start);		
+					void limit_end(Anabel::Timestamp end);			
+					void prepare_read(void);	// invoke before using get_data and after limits
 					unsigned get_data(unsigned records_to_read, void * buffer);
 			};
 

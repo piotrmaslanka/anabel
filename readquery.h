@@ -16,11 +16,14 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #pragma once
+#include <anabel/stdafx.h>
 #include <anabel/anabel.h>
 #include <anabel/fsobjects.h>
-#include <boost/filesystem.hpp>
 
 namespace Anabel {	
+	/**
+	Class that represents a query made against a particular Anabel data set
+	*/
 	class ReadQuery {
 		friend class TimeSeries;
 		private:
@@ -29,14 +32,20 @@ namespace Anabel {
 			Anabel::Internal::DirectoryIterator * diter;
 			Anabel::Internal::IntelligentFileReader * opened_file;			
 			void * data_cache;
-			unsigned cache_entries;
+			void * cache_ofs;
+			unsigned available_cache_entries;
 			unsigned desired_cache_size;
 			bool first_readed;
 			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> * files, int record_size);
 
 			void prime_cache(void);
+			/**
+			Low-level data reader.
+			Extracts data from input. Returns zero on no more data. Does nothing with cache
+			*/
 			unsigned ll_get_data(unsigned count, void * buffer);
 		public:
+			unsigned get_data(unsigned count, void * buffer);
 			void set_desired_cache_size(unsigned elements);
 			~ReadQuery();
 
