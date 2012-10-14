@@ -67,10 +67,12 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 
 	files->push_back(cpath);
 
+	if (choice <= from) return new Anabel::ReadQuery(from, to, files, this->record_size);	// single-file wonder
+
 	// Now we will trace thru the filesystem, finding doodz. First up the tree, and then sharp dive towards 'to'
 
 	while (true) {
-		path cpath_parent(cpath.parent_path());
+ 		path cpath_parent(cpath.parent_path());
 		Timestamp cpath_filename_t = string_to_timestamp(cpath.filename().string());
 
 		elements = scan_directory(cpath_parent);

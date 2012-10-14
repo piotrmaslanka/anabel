@@ -8,7 +8,7 @@ using namespace std;
 struct a_window {
 	Anabel::Timestamp timestamp;
 	unsigned value;
-}
+};
 
 int main() {
 	a_window * lol;
@@ -16,7 +16,7 @@ int main() {
 	Anabel::TimeSeries timeseries("d:\\mirabelka");
 	timeseries.open(Anabel::TSO_READ);
 
-	Anabel::ReadQuery * rq = timeseries.get_query(10, 800);
+	Anabel::ReadQuery * rq = timeseries.get_query(10, 200);
 
 	lol = (a_window*)malloc(12*100);
 

@@ -38,6 +38,10 @@ namespace Anabel {
 			bool first_readed;
 			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> * files, int record_size);
 
+			/**
+			Load desired_cache_size from cache, if it's empty.
+			If there are no more files to process, do nothing.
+			*/
 			void prime_cache(void);
 			/**
 			Low-level data reader.
