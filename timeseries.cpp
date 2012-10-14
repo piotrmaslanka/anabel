@@ -65,15 +65,15 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		return new Anabel::ReadQuery(from, to, NULL, this->record_size);
 	}
 
-	if (choice <= from) {
 		files->push_back(cpath);
+	if (choice <= from) {
 		return new Anabel::ReadQuery(from, to, files, this->record_size);	// response is a single-file wonder
 	}
 
 	cpath = cpath.parent_path();
 
 	// Now we will trace thru the filesystem, finding doodz. First up the tree, and then sharp dive towards 'to'
-
+	Timestamp previous_choice = choice;
 	while (true) {
 		elements = scan_directory(cpath);
 		sort(elements.begin(), elements.end(), std::greater<Timestamp>());
@@ -82,6 +82,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		if (bound == elements.end()) {	// we need to ascend
 			// index files from bound upwards
 			for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != elements.end(); start_bound++) {
+				if (previous_choice == *start_bound) continue;
 				files->push_back(cpath / timestamp_to_string(*start_bound));
 			}
 			cpath = cpath.parent_path();
@@ -89,14 +90,10 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		}
 
 		// Descent to "bound"
-		bool iterated = false;
-		for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != bound;) {
-			start_bound++;
+		for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != bound; start_bound++) {
+			if (previous_choice == *start_bound) continue;
 			files->push_back(cpath / timestamp_to_string(*start_bound));
-			iterated = true;
 		}
-
-		if (iterated) files->pop_back();
 
 		cpath = cpath / timestamp_to_string(*bound);
 		if (is_regular_file(cpath)) {
