@@ -16,7 +16,7 @@ int main() {
 	Anabel::TimeSeries timeseries("d:\\mirabelka");
 	timeseries.open(Anabel::TSO_READ);
 
-	Anabel::ReadQuery * rq = timeseries.get_query(10, 200);
+	Anabel::ReadQuery * rq = timeseries.get_query(254, 502);
 
 	lol = (a_window*)malloc(12*100);
 
@@ -25,8 +25,10 @@ int main() {
 		readed = rq->get_data(100, lol);
 		for (int i=0; i<readed; i++) 
 			cout << lol[i].timestamp << " " << lol[i].value << endl;
-		system("pause");
 	}
 	while (readed != 0);
+
+	delete rq;
+	system("pause");
 
 }

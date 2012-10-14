@@ -65,39 +65,43 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		return new Anabel::ReadQuery(from, to, NULL, this->record_size);
 	}
 
-	files->push_back(cpath);
+	if (choice <= from) {
+		files->push_back(cpath);
+		return new Anabel::ReadQuery(from, to, files, this->record_size);	// response is a single-file wonder
+	}
 
-	if (choice <= from) return new Anabel::ReadQuery(from, to, files, this->record_size);	// single-file wonder
+	cpath = cpath.parent_path();
 
 	// Now we will trace thru the filesystem, finding doodz. First up the tree, and then sharp dive towards 'to'
 
 	while (true) {
- 		path cpath_parent(cpath.parent_path());
-		Timestamp cpath_filename_t = string_to_timestamp(cpath.filename().string());
+		elements = scan_directory(cpath);
+		sort(elements.begin(), elements.end(), std::greater<Timestamp>());
+		timevectoriter bound = upper_bound(elements.begin(), elements.end(), from, std::greater<Timestamp>());
 
-		elements = scan_directory(cpath_parent);
-		sort(elements.begin(), elements.end());
-
-		timevectoriter bound = upper_bound(elements.begin(), elements.end(), from);
-		vector<path> temp;
-		for (timevectoriter iter = bound; *iter<cpath_filename_t; iter++)
-			temp.push_back(cpath_parent / timestamp_to_string(*iter));
-		for (vector<path>::reverse_iterator iter = temp.rbegin(); iter != temp.rend(); iter++) files->push_back(*iter);
-
-		if (bound==elements.begin()) { // we have to examine the parent directory 
-			cpath = cpath.parent_path();
-		} else {
-			bound--;
-			cpath = cpath_parent / timestamp_to_string(*bound);
-			if (is_regular_file(cpath)) {
-				for (timevectoriter iter = elements.end()-1; iter >= bound; iter--) {
-					files->push_back(cpath_parent / timestamp_to_string(*iter));		// LBA file found, we need to finish iterating this directory
-					if (iter == elements.begin()) break;
-				}
-				break;
+		if (bound == elements.end()) {	// we need to ascend
+			// index files from bound upwards
+			for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != elements.end(); start_bound++) {
+				files->push_back(cpath / timestamp_to_string(*start_bound));
 			}
-			// this is not a real file. we will use a "fake" file to force the algoritm to work properly with a bound
-			cpath /= timestamp_to_string(from);	// kinda faking a file, but algorithm doesn't care
+			cpath = cpath.parent_path();
+			continue;
+		}
+
+		// Descent to "bound"
+		bool iterated = false;
+		for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != bound;) {
+			start_bound++;
+			files->push_back(cpath / timestamp_to_string(*start_bound));
+			iterated = true;
+		}
+
+		if (iterated) files->pop_back();
+
+		cpath = cpath / timestamp_to_string(*bound);
+		if (is_regular_file(cpath)) {
+			files->push_back(cpath);
+			break;
 		}
 	}
 

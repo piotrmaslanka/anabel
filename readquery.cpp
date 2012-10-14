@@ -82,6 +82,6 @@ Anabel::ReadQuery::ReadQuery(Timestamp from, Timestamp to, std::vector<boost::fi
 }
 Anabel::ReadQuery::~ReadQuery() {
 	if (this->data_cache != NULL) free(this->data_cache);
-	if (this->opened_file != NULL)  free(this->opened_file);
+	if (this->opened_file != NULL) free(this->opened_file);
 	delete this->diter;
 }
