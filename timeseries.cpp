@@ -45,13 +45,13 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	typedef vector<Timestamp>::iterator timevectoriter;
 
 	// Init variables
-	path cpath = *this->root_path;
+	path cpath = this->root_path;
 	timevector elements;
 	Timestamp choice;
 	vector<path> * files = new vector<path>();
 
 	// Locate UBA
-	cpath = *this->root_path;
+	cpath = this->root_path;
 	try {
 		while (is_directory(cpath)) {
 			elements = scan_directory(cpath);
@@ -105,6 +105,21 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	}
 
 	return new Anabel::ReadQuery(from, to, files, this->record_size);
+}
+
+void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) {
+	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
+
+	path path(this->root_path);
+	while (!is_regular_file(path)) {
+		vector<Timestamp> elements = scan_directory(path);
+		path /= timestamp_to_string(*max_element(elements.begin(), elements.end()));
+	}
+
+	ofstream file(path.string(), std::ios::binary | std::ios::app);
+	file.write((char*)(&timestamp), 8);
+	file.write((char*)value, this->record_size);
+	file.close();
 }
 
 void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
@@ -163,7 +178,7 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	}
 
 	// Read type of time series, as we don't know it now
-	std::ifstream conf((*this->root_path / "record_size").string());
+	std::ifstream conf((this->root_path / "record_size").string());
 	conf >> this->record_size;
 	conf.close();
 
@@ -194,17 +209,17 @@ void Anabel::TimeSeries::close(void) {
 
 Anabel::TimeSeries::TimeSeries(std::string rootdirpath) : mode(TSO_CLOSED), record_size(0) {
 	// Prepare pathes
-	this->root_path = new path(rootdirpath);
-	path rsize_path(*this->root_path);
+	this->root_path = rootdirpath;
+	path rsize_path(this->root_path);
 	rsize_path /= "record_size";
-	path alock_path(*this->root_path);
+	path alock_path(this->root_path);
 	alock_path /= "alock";
-	path block_path(*this->root_path);
+	path block_path(this->root_path);
 	block_path /= "block";
 
 	// Sanity-check pathes
-	if (!exists(*this->root_path)) throw InvalidRootDirectory("root directory does not exist");
-	if (!is_directory(*this->root_path)) throw InvalidRootDirectory("root directory is not a directory");
+	if (!exists(this->root_path)) throw InvalidRootDirectory("root directory does not exist");
+	if (!is_directory(this->root_path)) throw InvalidRootDirectory("root directory is not a directory");
 	if (!exists(rsize_path)) throw InvalidRootDirectory("rsize_path file not found");
 	if (!exists(alock_path)) throw InvalidRootDirectory("append lock not found");
 	if (!exists(block_path)) throw InvalidRootDirectory("rebalance lock not found");
@@ -217,5 +232,4 @@ Anabel::TimeSeries::~TimeSeries() {
 	if (this->mode != TSO_CLOSED) this->close();
 	delete this->alock;
 	delete this->block;
-	delete this->root_path;
 }

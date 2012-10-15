@@ -31,13 +31,14 @@ namespace Anabel {
 		private:
 			boost::interprocess::file_lock * alock;
 			boost::interprocess::file_lock * block;
-			boost::filesystem::path * root_path;
+			boost::filesystem::path root_path;
 		public:
 			int record_size;
 			TimeSeriesOpenMode mode; // don't modify from userland
 			TimeSeries(std::string rootdirpath);
 			~TimeSeries();
 			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
+			void append(Anabel::Timestamp timestamp, void * value);
 			void open(TimeSeriesOpenMode open_mode);
 			void close(void);
 	};
