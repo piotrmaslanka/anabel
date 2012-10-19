@@ -83,10 +83,12 @@ void Anabel::Internal::IntelligentFileReader::prepare_read(void) {
 	this->seekg(this->start_at_ofs);
 }
 void Anabel::Internal::IntelligentFileReader::limit_start(Anabel::Timestamp start) {
+	if (this->records_remaining == 0) return;
 	this->start_at_ofs = this->locate(start)*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {
+	if (this->records_remaining == 0) return;
 	this->end_at_ofs = (1+this->locate(stop))*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
