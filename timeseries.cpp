@@ -132,14 +132,14 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	switch (open_mode) {
 		case TSO_APPEND:
 			try {
-				this->alock->try_lock();
+				this->block->try_lock();
 			} catch (boost::interprocess::lock_exception exc) {
 				throw TimeSeriesLocked();
 			}
 			break;
 		case TSO_REBALANCE:
 			try {
-				this->block->try_lock();
+				this->alock->try_lock();
 			} catch (boost::interprocess::lock_exception exc) {
 				throw TimeSeriesLocked();
 			}
@@ -148,12 +148,6 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 			try {
 				this->alock->try_lock_sharable();
 			} catch (boost::interprocess::lock_exception exc) {
-				throw TimeSeriesLocked();
-			}
-			try {
-				this->block->try_lock_sharable();
-			} catch (boost::interprocess::lock_exception exc) {
-				this->alock->unlock_sharable();
 				throw TimeSeriesLocked();
 			}
 			break;
