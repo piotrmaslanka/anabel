@@ -41,5 +41,7 @@ namespace Anabel {
 			void append(Anabel::Timestamp timestamp, void * value);
 			void open(TimeSeriesOpenMode open_mode);
 			void close(void);
+
+			static void create(std::string rootdirpath, int record_size);
 	};
 };

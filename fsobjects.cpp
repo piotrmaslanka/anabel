@@ -60,7 +60,6 @@ Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem
 	this->total_records = this->records_remaining;
 
 }
-
 unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time) {
 	Anabel::Timestamp temp;
 	unsigned imin = 0;
@@ -94,17 +93,15 @@ void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) 
 }
 unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_read, void * buffer) {
 	if (records_to_read > this->records_remaining) records_to_read = records_remaining;
-
 	this->read((char*)buffer, records_to_read*(8 + this->record_size));
-
 	this->records_remaining -= records_to_read;
-
 	return records_to_read;
 }
 
 // files are to be passed sorted descending
 Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesystem::path> * files) {
-	for (std::vector<boost::filesystem::path>::iterator iter = files->begin(); iter<files->end(); iter++) this->state.push_front(*iter);
+	if (files != NULL)
+		for (std::vector<boost::filesystem::path>::iterator iter = files->begin(); iter<files->end(); iter++) this->state.push_front(*iter);
 	this->empty = (this->state.size() == 0);
 	delete files;
 }

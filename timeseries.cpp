@@ -24,6 +24,17 @@ using namespace Anabel::Exceptions;
 using namespace std;
 using namespace Anabel;
 using namespace Anabel::Internal;
+
+void Anabel::TimeSeries::create(std::string rootdirpath, int record_size) {
+	path rootpath(rootdirpath);
+	try {
+		create_directory(rootpath);
+	} catch (...) {}
+	ofstream alock((rootpath / "alock").string()); alock.close();
+	ofstream block((rootpath / "block").string()); block.close();
+	ofstream rsf((rootpath / "record_size").string()); rsf << record_size; rsf.close();
+}
+
 /**
 * Chooses a timestamp that can be chosen, so it contains needle.
 * 
