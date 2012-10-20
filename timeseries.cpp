@@ -118,6 +118,13 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	return new Anabel::ReadQuery(from, to, files, this->record_size);
 }
 
+void Anabel::TimeSeries::truncate(void) {
+	if (this->mode != TSO_WRITE) throw InvalidInvocation("invalid open mode");
+
+	vector<Timestamp> elements = scan_directory(this->root_path);
+	for (vector<Timestamp>::iterator iter = elements.begin(); iter != elements.end(); iter++) remove_all(this->root_path / Anabel::Internal::timestamp_to_string(*iter));
+}
+
 void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) {
 	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 
@@ -134,46 +141,34 @@ void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) {
 }
 
 void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
-	// Do the locking!
-	/*
-		Now, how do I resolve deadlocks? They may happen.
-		During a deadlock, second acquisiton will raise an exception. Then, I will release the locks. 
-		And fun begins again. Maybe backoff algorithm can be used by the upper layer? 
+	/* Locking interaction table (whether two types of locks may be acquired if the other is present):
+				READ			WRITE			REBALANCE			APPEND
+	READ        YES             NO              NO                  YES
+	WRITE       NO              NO              NO                  NO
+	REBALANCE   NO              NO              NO                  YES
+	APPEND      YES             NO              YES                 NO
+
+	Types of locks acquired (eXclusive, Shareable):
+		READ:		S(A)
+		WRITE:		X(A)+X(B)
+		APPEND:		X(B)
+		REBALANCE:	X(A)
+
+	As you may see, deadlocks will not happen
 	*/
 	switch (open_mode) {
 		case TSO_APPEND:
-			try {
-				this->block->try_lock();
-			} catch (boost::interprocess::lock_exception exc) {
-				throw TimeSeriesLocked();
-			}
+			this->block->lock();
 			break;
 		case TSO_REBALANCE:
-			try {
-				this->alock->try_lock();
-			} catch (boost::interprocess::lock_exception exc) {
-				throw TimeSeriesLocked();
-			}
+			this->alock->lock();
 			break;
 		case TSO_READ:
-			try {
-				this->alock->try_lock_sharable();
-			} catch (boost::interprocess::lock_exception exc) {
-				throw TimeSeriesLocked();
-			}
+			this->alock->lock_sharable();
 			break;
 		case TSO_WRITE:
-			try {
-				this->alock->try_lock();
-			} catch (boost::interprocess::lock_exception exc) {
-				throw TimeSeriesLocked();
-			}
-			try {
-				this->block->try_lock();
-			} catch (boost::interprocess::lock_exception exc) {
-				this->alock->unlock();
-				throw TimeSeriesLocked();
-			}
+			this->alock->lock();
+			this->block->lock();
 			break;
 		case TSO_CLOSED:	// funnt, not undefined though
 			throw InvalidInvocation("invalid open_mode");

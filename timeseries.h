@@ -38,10 +38,27 @@ namespace Anabel {
 			TimeSeries(std::string rootdirpath);
 			~TimeSeries();
 			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
+			/**
+			* Appends a piece of data to the database.
+			* If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
+			*/
 			void append(Anabel::Timestamp timestamp, void * value);
+			/**
+			* Opens the database in given mode
+			* Will wait if database is locked.
+			*/
 			void open(TimeSeriesOpenMode open_mode);
 			void close(void);
 
+			/**
+			* Creates a new, empty database, whose root directory is specified by rootdirpath.
+			* Will create rootdirpath if it doesn't exist
+			*/
 			static void create(std::string rootdirpath, int record_size);
+			/**
+			* Clears the database. 
+			* Requires database to be open in TSO_WRITE mode
+			*/
+			void truncate(void);
 	};
 };
