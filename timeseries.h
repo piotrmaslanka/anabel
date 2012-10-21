@@ -63,7 +63,13 @@ namespace Anabel {
 			/**
 			* Returns last entry in given database
 			* Returns true if entry was found - else if the DB is empty
+			* Buffer is in form:
+			*    #pragma pack(1)
+			*    struct buffer {
+			*         Anabel::Timestamp timestamp;
+			*         your_favourite_type value;
+			*    };
 			**/
-			bool get_last(void * buffer, Anabel::Timestamp * timestamp);
+			bool get_last(void * buffer);
 	};
 };

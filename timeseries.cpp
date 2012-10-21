@@ -184,9 +184,27 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	this->mode = open_mode;
 }
 
-bool Anabel::TimeSeries::get_last(void * buffer, Anabel::Timestamp * timestamp) {
+bool Anabel::TimeSeries::get_last(void * buffer) {
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
-	throw "Not implemented";
+	
+	vector<Timestamp> elements = scan_directory(this->root_path);
+	sort(elements.begin(), elements.end());
+	vector<path> files;
+	for (vector<Timestamp>::iterator iter = elements.begin(); iter != elements.end(); iter++)
+		files.push_back(this->root_path / timestamp_to_string(*iter));
+
+	DirectoryIterator diter(files);
+
+	while (true) {
+		if (diter.empty) return false;
+		IntelligentFileReader ifr(diter.next(), this->record_size);
+		if (ifr.records_remaining > 0) {
+			ifr.seek_record(ifr.records_remaining-1);
+			ifr.get_data(1,buffer);
+			return true;
+		}
+		ifr.close();
+	}
 }
 
 void Anabel::TimeSeries::close(void) {

@@ -97,6 +97,11 @@ unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_r
 	this->records_remaining -= records_to_read;
 	return records_to_read;
 }
+void Anabel::Internal::IntelligentFileReader::seek_record(unsigned record_no) {
+	if (record_no >= (this->total_records)) throw Anabel::Exceptions::InvalidInvocation("Cannot seek to record that does not exist");
+	this->seekg(8+(record_no*this->record_size));
+	this->records_remaining = this->total_records - record_no;
+}
 
 // files are to be passed sorted descending
 Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesystem::path> files) {
@@ -105,7 +110,7 @@ Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesy
 }
 
 boost::filesystem::path Anabel::Internal::DirectoryIterator::next(void) {
-	if (this->empty) return NULL;
+	if (this->empty) throw Anabel::Exceptions::InvalidInvocation("Empty. It is your duty to ensure it is not before calling next()!");
 	boost::filesystem::path temp;
 	temp = this->state.front();
 	this->state.pop_front();
@@ -118,5 +123,5 @@ boost::filesystem::path Anabel::Internal::DirectoryIterator::next(void) {
 		this->state.pop_front();
 		this->empty = (this->state.size() == 0);
 	}
-	return boost::filesystem::path(temp);
+	return temp;
 }

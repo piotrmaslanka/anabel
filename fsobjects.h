@@ -43,6 +43,11 @@ namespace Anabel {
 				public:
 					unsigned records_remaining;
 					IntelligentFileReader(boost::filesystem::path path, unsigned record_size);
+					/**
+					* Seeks to given record. Records are numbered from 0. Throws InvalidInvocation exception if record does not exist.
+					* Happily disobeys previous limit_start and limit_end.
+					*/
+					void seek_record(unsigned record_no);
 					void limit_start(Anabel::Timestamp start);		
 					void limit_end(Anabel::Timestamp end);			
 					void prepare_read(void);	// invoke before using get_data and after limits
