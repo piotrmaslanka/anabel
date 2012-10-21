@@ -52,7 +52,7 @@ vector<Timestamp> Anabel::Internal::scan_directory(boost::filesystem::path direc
 }
 
 Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem::path path, unsigned record_size) : record_size(record_size), start_at_ofs(8) {
-	this->open(path.string(), std::ios::binary);
+	this->open(path.string().c_str(), std::ios::binary);
 	this->seekg(0, std::ios::end);
 	this->end_at_ofs = (unsigned)(this->tellg());		// end of file
 	this->seekg(8, std::ios::beg);	// skip the header

@@ -30,9 +30,9 @@ void Anabel::TimeSeries::create(std::string rootdirpath, int record_size) {
 	try {
 		create_directory(rootpath);
 	} catch (...) {}
-	ofstream alock((rootpath / "alock").string()); alock.close();
-	ofstream block((rootpath / "block").string()); block.close();
-	ofstream rsf((rootpath / "record_size").string()); rsf << record_size; rsf.close();
+	ofstream alock((rootpath / "alock").string().c_str()); alock.close();
+	ofstream block((rootpath / "block").string().c_str()); block.close();
+	ofstream rsf((rootpath / "record_size").string().c_str()); rsf << record_size; rsf.close();
 }
 
 /**
@@ -133,7 +133,7 @@ void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) {
 		path /= timestamp_to_string(*max_element(elements.begin(), elements.end()));
 	}
 
-	ofstream file(path.string(), std::ios::binary | std::ios::app);
+	ofstream file(path.string().c_str(), std::ios::binary | std::ios::app);
 	file.write((char*)(&timestamp), 8);
 	file.write((char*)value, this->record_size);
 	file.close();
@@ -177,7 +177,7 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	}
 
 	// Read type of time series, as we don't know it now
-	std::ifstream conf((this->root_path / "record_size").string());
+	std::ifstream conf((this->root_path / "record_size").string().c_str());
 	conf >> this->record_size;
 	conf.close();
 
