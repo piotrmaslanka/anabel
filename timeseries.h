@@ -35,7 +35,7 @@ namespace Anabel {
 		public:
 			int record_size;
 			TimeSeriesOpenMode mode; // don't modify from userland
-			TimeSeries(std::string rootdirpath);
+			TimeSeries(char * rootdirpath);
 			~TimeSeries();
 			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
 			/**

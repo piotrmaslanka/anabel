@@ -229,7 +229,7 @@ void Anabel::TimeSeries::close(void) {
 }
 
 
-Anabel::TimeSeries::TimeSeries(std::string rootdirpath) : mode(TSO_CLOSED), record_size(0) {
+Anabel::TimeSeries::TimeSeries(char * rootdirpath) : mode(TSO_CLOSED), record_size(0) {
 	// Prepare pathes
 	this->root_path = rootdirpath;
 	path rsize_path(this->root_path);
