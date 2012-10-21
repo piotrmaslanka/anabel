@@ -2,7 +2,6 @@
 # Extract the files so that *.cpp and *.h are in anabel directory in some subfolder S. Then
 # invoke build.sh with a single parameter - S, that is - the directory where those can be found
 # you may want to adjust Python include library here
-g++ -fPIC -I$1 -c main.cpp
 g++ -fPIC -I$1 -c exceptions.cpp
 g++ -fPIC -I$1 -c fsobjects.cpp
 g++ -fPIC -I$1 -c readquery.cpp
