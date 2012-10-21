@@ -60,5 +60,10 @@ namespace Anabel {
 			* Requires database to be open in TSO_WRITE mode
 			*/
 			void truncate(void);
+			/**
+			* Returns last entry in given database
+			* Returns true if entry was found - else if the DB is empty
+			**/
+			bool get_last(void * buffer, Anabel::Timestamp * timestamp);
 	};
 };

@@ -59,7 +59,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	path cpath = this->root_path;
 	timevector elements;
 	Timestamp choice;
-	vector<path> * files = new vector<path>();
+	vector<path> files;
 
 	// Locate UBA
 	cpath = this->root_path;
@@ -72,11 +72,10 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		}
 	} catch (InternalError e) {
 		// query empty.
-		delete files;
-		return new Anabel::ReadQuery(from, to, NULL, this->record_size);
+		return new Anabel::ReadQuery(from, to, files, this->record_size);
 	}
 
-		files->push_back(cpath);
+	files.push_back(cpath);
 	if (choice <= from) {
 		return new Anabel::ReadQuery(from, to, files, this->record_size);	// response is a single-file wonder
 	}
@@ -95,7 +94,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 			for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != elements.end(); start_bound++) {
 				if (previous_choice == *start_bound) continue;
 				previous_choice = *start_bound;
-				files->push_back(cpath / timestamp_to_string(*start_bound));
+				files.push_back(cpath / timestamp_to_string(*start_bound));
 			}
 			cpath = cpath.parent_path();
 			continue;
@@ -105,12 +104,12 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		for (timevectoriter start_bound = upper_bound(elements.begin(), elements.end(), to, std::greater<Timestamp>()); start_bound != bound; start_bound++) {
 			if (previous_choice == *start_bound) continue;
 			previous_choice = *start_bound;
-			files->push_back(cpath / timestamp_to_string(*start_bound));
+			files.push_back(cpath / timestamp_to_string(*start_bound));
 		}
 
 		cpath = cpath / timestamp_to_string(*bound);
 		if (is_regular_file(cpath)) {
-			files->push_back(cpath);
+			files.push_back(cpath);
 			break;
 		}
 	}
@@ -183,6 +182,11 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	conf.close();
 
 	this->mode = open_mode;
+}
+
+bool Anabel::TimeSeries::get_last(void * buffer, Anabel::Timestamp * timestamp) {
+	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
+	throw "Not implemented";
 }
 
 void Anabel::TimeSeries::close(void) {

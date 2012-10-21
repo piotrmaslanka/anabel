@@ -99,11 +99,9 @@ unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_r
 }
 
 // files are to be passed sorted descending
-Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesystem::path> * files) {
-	if (files != NULL)
-		for (std::vector<boost::filesystem::path>::iterator iter = files->begin(); iter<files->end(); iter++) this->state.push_front(*iter);
+Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesystem::path> files) {
+	for (std::vector<boost::filesystem::path>::iterator iter = files.begin(); iter!=files.end(); iter++) this->state.push_front(*iter);
 	this->empty = (this->state.size() == 0);
-	delete files;
 }
 
 boost::filesystem::path Anabel::Internal::DirectoryIterator::next(void) {

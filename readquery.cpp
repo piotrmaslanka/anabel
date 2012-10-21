@@ -70,12 +70,12 @@ unsigned Anabel::ReadQuery::ll_get_data(unsigned count, void * buffer) {
 }
 
 
-Anabel::ReadQuery::ReadQuery(Timestamp from, Timestamp to, std::vector<boost::filesystem::path> * files, int record_size) : from(from), to(to), 
-																															record_size(record_size),
-																															first_readed(true),
-																															opened_file(NULL), data_cache(NULL),																																
-																															desired_cache_size(20000),
-																															available_cache_entries(0)
+Anabel::ReadQuery::ReadQuery(Timestamp from, Timestamp to, std::vector<boost::filesystem::path> files, int record_size) : from(from), to(to), 
+																														  record_size(record_size),
+																														  first_readed(true),
+																														  opened_file(NULL), data_cache(NULL),																																
+																														  desired_cache_size(20000),
+																														  available_cache_entries(0)
 
 {
 	this->diter = new Anabel::Internal::DirectoryIterator(files);
