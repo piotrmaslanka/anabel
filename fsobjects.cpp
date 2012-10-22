@@ -99,7 +99,7 @@ unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_r
 }
 void Anabel::Internal::IntelligentFileReader::seek_record(unsigned record_no) {
 	if (record_no >= (this->total_records)) throw Anabel::Exceptions::InvalidInvocation("Cannot seek to record that does not exist");
-	this->seekg(8+(record_no*this->record_size));
+	this->seekg(8+(record_no*(8+this->record_size)));
 	this->records_remaining = this->total_records - record_no;
 }
 
