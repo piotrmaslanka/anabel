@@ -24,10 +24,11 @@ namespace Anabel {
 			class DirectoryIterator {
 				private:
 					std::deque<boost::filesystem::path> state;
+					bool reverse;
 				public:
 					bool empty;
 					boost::filesystem::path next(void);
-					DirectoryIterator(std::vector<boost::filesystem::path> files);
+					DirectoryIterator(std::vector<boost::filesystem::path> files, bool reverse=false);
 			};
 
 			class IntelligentFileReader: public std::ifstream {

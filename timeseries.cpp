@@ -193,7 +193,7 @@ bool Anabel::TimeSeries::get_last(void * buffer) {
 	for (vector<Timestamp>::iterator iter = elements.begin(); iter != elements.end(); iter++)
 		files.push_back(this->root_path / timestamp_to_string(*iter));
 
-	DirectoryIterator diter(files);
+	DirectoryIterator diter(files, true);
 
 	while (true) {
 		if (diter.empty) return false;

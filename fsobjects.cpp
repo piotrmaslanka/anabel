@@ -104,7 +104,7 @@ void Anabel::Internal::IntelligentFileReader::seek_record(unsigned record_no) {
 }
 
 // files are to be passed sorted descending
-Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesystem::path> files) {
+Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesystem::path> files, bool reverse) :reverse(reverse) {
 	for (std::vector<boost::filesystem::path>::iterator iter = files.begin(); iter!=files.end(); iter++) this->state.push_front(*iter);
 	this->empty = (this->state.size() == 0);
 }
@@ -117,7 +117,10 @@ boost::filesystem::path Anabel::Internal::DirectoryIterator::next(void) {
 	this->empty = (this->state.size() == 0);
 	while (is_directory(temp)) {
 		vector<Timestamp> stuff = scan_directory(temp);
-		sort(stuff.begin(), stuff.end());
+		if (this->reverse)
+			sort(stuff.begin(), stuff.end(), std::greater<Timestamp>());
+		else
+			sort(stuff.begin(), stuff.end());
 		for (vector<Timestamp>::reverse_iterator iter = stuff.rbegin(); iter != stuff.rend(); iter++) this->state.push_front(temp / timestamp_to_string(*iter));
 		temp = this->state.front();
 		this->state.pop_front();
