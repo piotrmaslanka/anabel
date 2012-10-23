@@ -98,7 +98,7 @@ unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_r
 	return records_to_read;
 }
 void Anabel::Internal::IntelligentFileReader::seek_record(unsigned record_no) {
-	if (record_no >= (this->total_records)) throw Anabel::Exceptions::InvalidInvocation("Cannot seek to record that does not exist");
+	if (record_no >= (this->total_records)) throw Anabel::Exceptions::InternalError("Cannot seek to record that does not exist");
 	this->seekg(8+(record_no*(8+this->record_size)));
 	this->records_remaining = this->total_records - record_no;
 }
@@ -110,7 +110,7 @@ Anabel::Internal::DirectoryIterator::DirectoryIterator(std::vector<boost::filesy
 }
 
 boost::filesystem::path Anabel::Internal::DirectoryIterator::next(void) {
-	if (this->empty) throw Anabel::Exceptions::InvalidInvocation("Empty. It is your duty to ensure it is not before calling next()!");
+	if (this->empty) throw Anabel::Exceptions::InternalError("Empty. It is your duty to ensure it is not before calling next()!");
 	boost::filesystem::path temp;
 	temp = this->state.front();
 	this->state.pop_front();

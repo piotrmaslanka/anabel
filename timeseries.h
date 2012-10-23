@@ -35,19 +35,19 @@ namespace Anabel {
 		public:
 			int record_size;
 			TimeSeriesOpenMode mode; // don't modify from userland
-			TimeSeries(char * rootdirpath);
+			TimeSeries(char * rootdirpath) throw(Anabel::Exceptions::InvalidRootDirectory);
 			~TimeSeries();
-			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to);
+			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			* Appends a piece of data to the database.
 			* If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
 			*/
-			void append(Anabel::Timestamp timestamp, void * value);
+			void append(Anabel::Timestamp timestamp, void * value) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			* Opens the database in given mode
 			* Will wait if database is locked.
 			*/
-			void open(TimeSeriesOpenMode open_mode);
+			void open(TimeSeriesOpenMode open_mode) throw(Anabel::Exceptions::InvalidInvocation);;
 			void close(void);
 
 			/**
@@ -59,7 +59,7 @@ namespace Anabel {
 			* Clears the database. 
 			* Requires database to be open in TSO_WRITE mode
 			*/
-			void truncate(void);
+			void truncate(void) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			* Returns last entry in given database
 			* Returns true if entry was found - else if the DB is empty
@@ -70,6 +70,6 @@ namespace Anabel {
 			*         your_favourite_type value;
 			*    };
 			**/
-			bool get_last(void * buffer);
+			bool get_last(void * buffer) throw(Anabel::Exceptions::InvalidInvocation);
 	};
 };

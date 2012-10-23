@@ -28,5 +28,5 @@ namespace Anabel {
 #include <anabel/readquery.h>
 #include <anabel/fsobjects.h>
 #include <anabel/timeseries.h>
-
+#include <anabel/prettyifier.h>
 

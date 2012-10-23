@@ -48,7 +48,7 @@ Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 	throw InternalError("needle not found");
 }
 
-Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) {
+Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation) {
 	// Sanity checks
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 
@@ -117,14 +117,14 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 	return new Anabel::ReadQuery(from, to, files, this->record_size);
 }
 
-void Anabel::TimeSeries::truncate(void) {
+void Anabel::TimeSeries::truncate(void) throw(Anabel::Exceptions::InvalidInvocation) {
 	if (this->mode != TSO_WRITE) throw InvalidInvocation("invalid open mode");
 
 	vector<Timestamp> elements = scan_directory(this->root_path);
 	for (vector<Timestamp>::iterator iter = elements.begin(); iter != elements.end(); iter++) remove_all(this->root_path / Anabel::Internal::timestamp_to_string(*iter));
 }
 
-void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) {
+void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) throw(Anabel::Exceptions::InvalidInvocation) {
 	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 
 	path path(this->root_path);
@@ -139,7 +139,7 @@ void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) {
 	file.close();
 }
 
-void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
+void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) throw(Anabel::Exceptions::InvalidInvocation) {
 	/* Locking interaction table (whether two types of locks may be acquired if the other is present):
 				READ			WRITE			REBALANCE			APPEND
 	READ        YES             NO              NO                  YES
@@ -184,7 +184,7 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) {
 	this->mode = open_mode;
 }
 
-bool Anabel::TimeSeries::get_last(void * buffer) {
+bool Anabel::TimeSeries::get_last(void * buffer) throw(Anabel::Exceptions::InvalidInvocation) {
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 	
 	vector<Timestamp> elements = scan_directory(this->root_path);
@@ -229,7 +229,7 @@ void Anabel::TimeSeries::close(void) {
 }
 
 
-Anabel::TimeSeries::TimeSeries(char * rootdirpath) : mode(TSO_CLOSED), record_size(0) {
+Anabel::TimeSeries::TimeSeries(char * rootdirpath) throw(Anabel::Exceptions::InvalidRootDirectory) : mode(TSO_CLOSED), record_size(0) {
 	// Prepare pathes
 	this->root_path = rootdirpath;
 	path rsize_path(this->root_path);

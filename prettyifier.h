@@ -1,4 +1,4 @@
-/* 
+/*
     This file is part of Anabel
 
     Anabel is free software; you can redistribute it and/or modify
@@ -15,18 +15,13 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include <anabel/stdafx.h>
 #include <anabel/anabel.h>
 
-Anabel::Exceptions::InvalidRootDirectory::InvalidRootDirectory(std::string errreason) {
-	this->reason = errreason;
-};
-Anabel::Exceptions::InvalidInvocation::InvalidInvocation(std::string errreason) {
-	this->reason = errreason;
-};
+namespace Anabel {
 
-// for internal use in Anabel
-
-Anabel::Exceptions::InternalError::InternalError(std::string errreason) {
-	this->reason = errreason;
+	template<class T>
+	struct Record {
+		Anabel::Timestamp timestamp;
+		T value;
+	};
 };

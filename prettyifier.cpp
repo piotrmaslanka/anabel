@@ -15,18 +15,3 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include <anabel/stdafx.h>
-#include <anabel/anabel.h>
-
-Anabel::Exceptions::InvalidRootDirectory::InvalidRootDirectory(std::string errreason) {
-	this->reason = errreason;
-};
-Anabel::Exceptions::InvalidInvocation::InvalidInvocation(std::string errreason) {
-	this->reason = errreason;
-};
-
-// for internal use in Anabel
-
-Anabel::Exceptions::InternalError::InternalError(std::string errreason) {
-	this->reason = errreason;
-};

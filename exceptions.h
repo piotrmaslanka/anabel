@@ -20,17 +20,21 @@
 
 namespace Anabel {
 	namespace Exceptions {
-		class TimeSeriesLocked {};
-		class InvalidRootDirectory {
+
+		class AnabelException {};
+
+		class InvalidRootDirectory : public AnabelException {
 			public:
 				std::string reason;
 				InvalidRootDirectory(std::string errreason);
 		};
-		class InvalidInvocation {
+		class InvalidInvocation : public AnabelException {
 			public:
 				std::string reason;
 				InvalidInvocation(std::string errreason);
 		};
+
+		// for Anabel's internal use only
 		class InternalError {
 			public:
 				std::string reason;
