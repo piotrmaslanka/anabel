@@ -2,13 +2,13 @@
 %{
 #include "anabel.h"
 #include "stdint.h"
+#include "py-interface.h"
 %}
 
 %include "anabel.h"
 %include "timeseries.h"
 %include "exceptions.h"
 %include "readquery.h"
-%include "prettyifier.h"
 
 %exception {
    try {
@@ -22,15 +22,22 @@
    }
 }
 
+/* numpy part */
+%{
+#define SWIG_FILE_WITH_INIT
+%}
+%include "numpy.i"
+%init %{
+import_array();
+%}
+
+%apply (unsigned long long* ARGOUT_ARRAY1, int DIM1) {(unsigned long long * outvec, unsigned amount)}
+%apply (int* ARGOUT_ARRAY1, int DIM1) {(int * outvec, unsigned amount)}
+%apply (float* ARGOUT_ARRAY1, int DIM1) {(float * outvec, unsigned amount)}
+
+%include "py-interface.h"
 
 namespace Anabel {
-    %template(RecordInt) Record<signed long int>;
-    %template(RecordShort) Record<signed int>;
-    %template(RecordChar) Record<signed char>;
-    %template(RecordFloat) Record<float>;
-
-	%template(WrapperInt) DataWrapper<int>;
-	%template(WrapperShort) DataWrapper<short>;
-	%template(WrapperChar) DataWrapper<char>;
-	%template(WrapperFloat) DataWrapper<float>;
+        %template (extract_int32) extract_value<int, int>;
+        %template (extract_float) extract_value<float, float>;
 }
