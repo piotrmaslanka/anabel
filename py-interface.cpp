@@ -17,7 +17,7 @@
 */
 #include <anabel/py-interface.h>
 
-void * Anabel::allocate_buffer(unsigned record_size, unsigned amount) { return malloc(record_size*amount); }
+void * Anabel::allocate_buffer(unsigned record_size, unsigned amount) { return malloc((record_size+8)*amount); }
 void Anabel::deallocate_buffer(void * buffer) { free(buffer); }
 
 void Anabel::extract_timestamps(unsigned long long * outvec, unsigned amount, void * buffer, unsigned record_size) {
