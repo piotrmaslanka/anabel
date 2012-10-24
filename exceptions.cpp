@@ -18,12 +18,8 @@
 #include <anabel/stdafx.h>
 #include <anabel/anabel.h>
 
-Anabel::Exceptions::InvalidRootDirectory::InvalidRootDirectory(std::string errreason) {
-	this->reason = errreason;
-};
-Anabel::Exceptions::InvalidInvocation::InvalidInvocation(std::string errreason) {
-	this->reason = errreason;
-};
+Anabel::Exceptions::InvalidRootDirectory::InvalidRootDirectory(char * errreason) : reason(errreason)  {};
+Anabel::Exceptions::InvalidInvocation::InvalidInvocation(char * errreason) : reason(errreason) {};
 
 // for internal use in Anabel
 

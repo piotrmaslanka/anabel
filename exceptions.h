@@ -25,13 +25,13 @@ namespace Anabel {
 
 		class InvalidRootDirectory : public AnabelException {
 			public:
-				std::string reason;
-				InvalidRootDirectory(std::string errreason);
-		};
+				char * reason;
+				InvalidRootDirectory(char * errreason);
+			};
 		class InvalidInvocation : public AnabelException {
 			public:
-				std::string reason;
-				InvalidInvocation(std::string errreason);
+				char * reason;
+				InvalidInvocation(char * errreason);
 		};
 
 		// for Anabel's internal use only

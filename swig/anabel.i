@@ -10,18 +10,6 @@
 %include "exceptions.h"
 %include "readquery.h"
 
-%exception {
-   try {
-   $action
-   } catch (Anabel::Exceptions::InvalidRootDirectory& e) {
-        PyErr_SetString(PyExc_EnvironmentError, e.reason.c_str());
-        return NULL;
-   } catch (Anabel::Exceptions::InvalidInvocation& e) {
-        PyErr_SetString(PyExc_AttributeError, e.reason.c_str());
-        return NULL;
-   }
-}
-
 /* numpy part */
 %{
 #define SWIG_FILE_WITH_INIT
