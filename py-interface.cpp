@@ -1,10 +1,5 @@
 /*
-    Anabel is an incremental data-series database
-    to store large amount of simply typed information
-    in a way that faciliates fast lookups and low
-    space consumption
-
-    Copyright (c) 2012, Piotr Maœlanka
+    This file is part of Anabel
 
     Anabel is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,12 +15,15 @@
     along with Anabel; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#pragma once
-namespace Anabel {
-	typedef unsigned long long Timestamp;
-};
-#include <anabel/exceptions.h>
-#include <anabel/readquery.h>
-#include <anabel/fsobjects.h>
-#include <anabel/timeseries.h>
+#include <anabel/py-interface.h>
 
+void * Anabel::allocate_buffer(unsigned record_size, unsigned amount) { return malloc(record_size*amount); }
+void Anabel::deallocate_buffer(void * buffer) { free(buffer); }
+
+void Anabel::extract_timestamps(unsigned long long * outvec, unsigned amount, void * buffer, unsigned record_size) {
+	Anabel::Timestamp * pval = (Anabel::Timestamp*)buffer;
+		for (unsigned i=0; i<amount; i++) {
+			outvec[i] = *pval;
+			pval = (Anabel::Timestamp*)(((char*)pval) + record_size);
+		}
+}
