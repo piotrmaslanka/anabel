@@ -22,7 +22,7 @@
 
 namespace Anabel {	
 	/**
-	Class that represents a query made against a particular Anabel data set
+	* Class that represents a query made against a particular Anabel data set.
 	*/
 	class ReadQuery {
 		friend class TimeSeries;

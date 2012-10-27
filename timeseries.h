@@ -70,7 +70,8 @@ namespace Anabel {
 
 			/**
 			* Creates a new, empty data set in time series' root directory
-			* Requires the database to be open in TSO_WRITE or TSO_APPEND mode
+			* Requires the database to be open in TSO_WRITE or TSO_APPEND mode.
+			* Will return with nothing if current highest-numbered dataset is empty
 			*/
 			void indent(void) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
