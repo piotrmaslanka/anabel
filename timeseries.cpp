@@ -33,7 +33,7 @@ void Anabel::TimeSeries::create(char * rootdirpath, int record_size) {
 	ofstream alock((rootpath / "alock").string().c_str()); alock.close();
 	ofstream block((rootpath / "block").string().c_str()); block.close();
 	ofstream rsf((rootpath / "record_size").string().c_str()); rsf << record_size; rsf.close();
-	ofstream rsf((rootpath / "0").string().c_str(), std::ios::binary); rsf.write("ANABEL\x00\x00", 8); rsf.close();
+	ofstream cof((rootpath / "0").string().c_str(), std::ios::binary); cof.write("ANABEL\x00\x00", 8); cof.close();
 }
 
 /**
@@ -183,6 +183,37 @@ void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) throw(Anabel::Except
 
 	this->mode = open_mode;
 }
+
+void Anabel::TimeSeries::indent(void) throw(Anabel::Exceptions::InvalidInvocation) {
+
+	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
+	vector<Timestamp> elements = scan_directory(this->root_path);
+	sort(elements.begin(), elements.end());
+	vector<path> files;
+	for (vector<Timestamp>::iterator iter = elements.begin(); iter != elements.end(); iter++)
+		files.push_back(this->root_path / timestamp_to_string(*iter));
+
+	DirectoryIterator diter(files, true);
+
+	Anabel::Timestamp * timestamp = (Anabel::Timestamp*)malloc(8+this->record_size);
+
+	while (true) {
+		if (diter.empty) return;
+		IntelligentFileReader ifr(diter.next(), this->record_size);
+		if (ifr.records_remaining > 0) {
+			ifr.seek_record(ifr.records_remaining-1);
+			ifr.get_data(1,(void*)timestamp);
+			
+			(*timestamp)++;
+
+			ofstream ofs((this->root_path / timestamp_to_string(*timestamp)).c_str(), std::ios::binary);
+			ofs.write("ANABEL\x00\x00", 8);
+			ofs.close();
+		}
+		ifr.close();
+	}
+}
+
 
 bool Anabel::TimeSeries::get_last(void * buffer) throw(Anabel::Exceptions::InvalidInvocation) {
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");

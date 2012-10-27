@@ -67,6 +67,12 @@ namespace Anabel {
 			* Requires database to be open in TSO_WRITE mode
 			*/
 			void truncate(void) throw(Anabel::Exceptions::InvalidInvocation);
+
+			/**
+			* Creates a new, empty data set in time series' root directory
+			* Requires the database to be open in TSO_WRITE or TSO_APPEND mode
+			*/
+			void indent(void) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			* Returns last entry in given database
 			* Returns true if entry was found - else if the DB is empty
