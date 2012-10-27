@@ -58,5 +58,6 @@ namespace Anabel {
 		std::vector<Timestamp> scan_directory(boost::filesystem::path directory);
 		std::string timestamp_to_string(Timestamp timestamp);
 		Timestamp string_to_timestamp(std::string str);
+		void make_empty_dataset(boost::filesystem::path path);
 	};
 };

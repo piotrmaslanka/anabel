@@ -33,7 +33,7 @@ void Anabel::TimeSeries::create(char * rootdirpath, int record_size) {
 	ofstream alock((rootpath / "alock").c_str()); alock.close();
 	ofstream block((rootpath / "block").c_str()); block.close();
 	ofstream rsf((rootpath / "record_size").c_str()); rsf << record_size; rsf.close();
-	ofstream cof((rootpath / "0").string().c_str(), std::ios::binary); cof.write("ANABEL\x00\x00", 8); cof.close();
+	make_empty_dataset(rootpath / "0");
 }
 
 /**
@@ -123,9 +123,7 @@ void Anabel::TimeSeries::truncate(void) throw(Anabel::Exceptions::InvalidInvocat
 
 	vector<Timestamp> elements = scan_directory(this->root_path);
 	for (vector<Timestamp>::iterator iter = elements.begin(); iter != elements.end(); iter++) remove_all(this->root_path / Anabel::Internal::timestamp_to_string(*iter));
-	ofstream ofs((this->root_path / "0").c_str(), std::ios::binary);
-	ofs.write("ANABEL\x00\x00", 8);
-	ofs.close();
+	make_empty_dataset(this->root_path / "0");
 }
 
 void Anabel::TimeSeries::append(void * value) throw(Anabel::Exceptions::InvalidInvocation) {
@@ -206,10 +204,7 @@ void Anabel::TimeSeries::indent(void) throw(Anabel::Exceptions::InvalidInvocatio
 		if (ifr.records_remaining > 0) {
 			ifr.seek_record(ifr.records_remaining-1);
 			ifr.get_data(1,(void*)timestamp);
-
-			ofstream ofs((this->root_path / timestamp_to_string((*timestamp)+1)).c_str(), std::ios::binary);
-			ofs.write("ANABEL\x00\x00", 8);
-			ofs.close();
+			make_empty_dataset(this->root_path / timestamp_to_string((*timestamp)+1));
 		}
 		ifr.close();
 	}

@@ -35,6 +35,12 @@ string Anabel::Internal::timestamp_to_string(Timestamp timestamp) {
 	return s.str();
 }
 
+void Anabel::Internal::make_empty_dataset(boost::filesystem::path path) {
+	ofstream ofs(path.c_str(), std::ios::binary);
+	ofs.write("ANABEL\x00\x00", 8);
+	ofs.close();
+}
+
 /**
 * Scans a directory, returning a vector of timestamp-objects found inside
 */
