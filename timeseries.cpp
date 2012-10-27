@@ -33,6 +33,7 @@ void Anabel::TimeSeries::create(char * rootdirpath, int record_size) {
 	ofstream alock((rootpath / "alock").string().c_str()); alock.close();
 	ofstream block((rootpath / "block").string().c_str()); block.close();
 	ofstream rsf((rootpath / "record_size").string().c_str()); rsf << record_size; rsf.close();
+	ofstream rsf((rootpath / "0").string().c_str(), std::ios::binary); rsf.write("ANABEL\x00\x00", 8); rsf.close();
 }
 
 /**
