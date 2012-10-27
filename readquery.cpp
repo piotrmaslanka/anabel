@@ -54,8 +54,14 @@ unsigned Anabel::ReadQuery::ll_get_data(unsigned count, void * buffer) {
 		}
 
 	if (this->opened_file == NULL) {
+	grab_next_file:
 		if (this->diter->empty) return 0;		// no more data can be output
 		this->opened_file = new Anabel::Internal::IntelligentFileReader(this->diter->next(), this->record_size);
+		if (this->opened_file->records_remaining == 0) {
+				// whacked or empty file
+			delete this->opened_file;
+			goto grab_next_file;
+		}
 		if (this->first_readed) {
 			this->first_readed = false;
 			this->opened_file->limit_start(this->from);

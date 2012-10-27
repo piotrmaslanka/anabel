@@ -55,6 +55,13 @@ Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem
 	this->open(path.string().c_str(), std::ios::binary);
 	this->seekg(0, std::ios::end);
 	this->end_at_ofs = (unsigned)(this->tellg());		// end of file
+	if (this->end_at_ofs < 8) {
+		// !!!!
+		// This file is invalid.
+		this->records_remaining = 0;
+		this->total_records = 0;
+		return;
+	}
 	this->seekg(8, std::ios::beg);	// skip the header
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 	this->total_records = this->records_remaining;
