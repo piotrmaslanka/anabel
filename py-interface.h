@@ -39,7 +39,7 @@ namespace Anabel {
 		}
 	}
 
-	template <class InternalType> void compose(InternalType value, Anabel::Timestamp timestamp, void * buffer) {
+	template <class InternalType> void compose(InternalType value, unsigned long long timestamp, void * buffer) {
 		Anabel::Timestamp * ptimestamp = (Anabel::Timestamp*)buffer;
 		InternalType * vtimestamp = (InternalType*)(((char*)buffer)+8);
 		*ptimestamp = timestamp;

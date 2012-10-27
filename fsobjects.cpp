@@ -60,7 +60,7 @@ Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem
 	this->total_records = this->records_remaining;
 
 }
-unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time) {
+unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time, bool round_up) {
 	Anabel::Timestamp temp;
 	unsigned imin = 0;
 	unsigned imax = this->total_records - 1;
@@ -76,6 +76,12 @@ unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time)
 		else
 			return imid;
 	}
+	// Value not found. We have to approximate.
+	if (round_up) {
+			// we will try to get to next record, if it exits...
+		if (imid == (this->total_records-1)) return imid; // it doesn't
+		return imid+1;
+	}
 	return imid;
 }
 void Anabel::Internal::IntelligentFileReader::prepare_read(void) {
@@ -83,12 +89,12 @@ void Anabel::Internal::IntelligentFileReader::prepare_read(void) {
 }
 void Anabel::Internal::IntelligentFileReader::limit_start(Anabel::Timestamp start) {
 	if (this->records_remaining == 0) return;
-	this->start_at_ofs = this->locate(start)*(8+this->record_size) + 8;
+	this->start_at_ofs = this->locate(start, true)*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {
 	if (this->records_remaining == 0) return;
-	this->end_at_ofs = (1+this->locate(stop))*(8+this->record_size) + 8;
+	this->end_at_ofs = (1+this->locate(stop, false))*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_read, void * buffer) {

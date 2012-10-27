@@ -38,9 +38,9 @@ namespace Anabel {
 					unsigned record_size;
 					unsigned total_records;
 					/**
-					* Returns index of record containing given value (or closest match)
+					* Returns index of record containing given value (or closest match, according to round_up)
 					*/
-					unsigned locate(Anabel::Timestamp time);
+					unsigned locate(Anabel::Timestamp time, bool round_up);
 				public:
 					unsigned records_remaining;
 					IntelligentFileReader(boost::filesystem::path path, unsigned record_size);
