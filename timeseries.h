@@ -61,7 +61,7 @@ namespace Anabel {
 			* Creates a new, empty database, whose root directory is specified by rootdirpath.
 			* Will create rootdirpath if it doesn't exist
 			*/
-			static void create(std::string rootdirpath, int record_size);
+			static void create(char * rootdirpath, int record_size);
 			/**
 			* Clears the database. 
 			* Requires database to be open in TSO_WRITE mode

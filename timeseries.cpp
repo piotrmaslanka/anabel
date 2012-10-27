@@ -25,7 +25,7 @@ using namespace std;
 using namespace Anabel;
 using namespace Anabel::Internal;
 
-void Anabel::TimeSeries::create(std::string rootdirpath, int record_size) {
+void Anabel::TimeSeries::create(char * rootdirpath, int record_size) {
 	path rootpath(rootdirpath);
 	try {
 		create_directory(rootpath);
