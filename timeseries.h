@@ -41,8 +41,15 @@ namespace Anabel {
 			/**
 			* Appends a piece of data to the database.
 			* If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
+			* Value is in form:
+			*    #pragma pack(1)
+			*    struct buffer {
+			*         Anabel::Timestamp timestamp;
+			*         your_favourite_type value;
+			*    };
+
 			*/
-			void append(Anabel::Timestamp timestamp, void * value) throw(Anabel::Exceptions::InvalidInvocation);
+			void append(void * value) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			* Opens the database in given mode
 			* Will wait if database is locked.

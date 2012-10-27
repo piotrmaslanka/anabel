@@ -38,4 +38,11 @@ namespace Anabel {
 			pval = (InternalType*)(((char*)pval) + 8 + sizeof(InternalType));
 		}
 	}
+
+	template <class InternalType> void compose(InternalType value, Anabel::Timestamp timestamp, void * buffer) {
+		Anabel::Timestamp * ptimestamp = (Anabel::Timestamp*)buffer;
+		InternalType * vtimestamp = (InternalType*)(((char*)buffer)+8);
+		*ptimestamp = timestamp;
+		*vtimestamp = value;
+	}
 };

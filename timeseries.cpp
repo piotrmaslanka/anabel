@@ -124,7 +124,7 @@ void Anabel::TimeSeries::truncate(void) throw(Anabel::Exceptions::InvalidInvocat
 	for (vector<Timestamp>::iterator iter = elements.begin(); iter != elements.end(); iter++) remove_all(this->root_path / Anabel::Internal::timestamp_to_string(*iter));
 }
 
-void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) throw(Anabel::Exceptions::InvalidInvocation) {
+void Anabel::TimeSeries::append(void * value) throw(Anabel::Exceptions::InvalidInvocation) {
 	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 
 	path path(this->root_path);
@@ -134,8 +134,7 @@ void Anabel::TimeSeries::append(Anabel::Timestamp timestamp, void * value) throw
 	}
 
 	ofstream file(path.string().c_str(), std::ios::binary | std::ios::app);
-	file.write((char*)(&timestamp), 8);
-	file.write((char*)value, this->record_size);
+	file.write((char*)value, 8+this->record_size);
 	file.close();
 }
 
