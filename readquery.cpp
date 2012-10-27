@@ -60,6 +60,7 @@ unsigned Anabel::ReadQuery::ll_get_data(unsigned count, void * buffer) {
 		if (this->opened_file->records_remaining == 0) {
 				// whacked or empty file
 			delete this->opened_file;
+			this->opened_file = NULL;
 			goto grab_next_file;
 		}
 		if (this->first_readed) {

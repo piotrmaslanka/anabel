@@ -206,10 +206,8 @@ void Anabel::TimeSeries::indent(void) throw(Anabel::Exceptions::InvalidInvocatio
 		if (ifr.records_remaining > 0) {
 			ifr.seek_record(ifr.records_remaining-1);
 			ifr.get_data(1,(void*)timestamp);
-			
-			(*timestamp)++;
 
-			ofstream ofs((this->root_path / timestamp_to_string(*timestamp)).c_str(), std::ios::binary);
+			ofstream ofs((this->root_path / timestamp_to_string((*timestamp)+1)).c_str(), std::ios::binary);
 			ofs.write("ANABEL\x00\x00", 8);
 			ofs.close();
 		}
