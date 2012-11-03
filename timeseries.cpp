@@ -253,6 +253,7 @@ void Anabel::TimeSeries::close(void) {
 		case TSO_CLOSED:
 			break;
 	}
+	this->mode = TSO_CLOSED;
 }
 
 
