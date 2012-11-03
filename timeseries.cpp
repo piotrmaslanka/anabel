@@ -28,6 +28,9 @@ using namespace Anabel::Internal;
 void Anabel::TimeSeries::create(char * rootdirpath, int record_size) {
 	path rootpath(rootdirpath);
 	try {
+		remove_all(rootpath);
+	} catch(...) {}
+	try {
 		create_directory(rootpath);
 	} catch (...) {}
 	ofstream alock((rootpath / "alock").c_str()); alock.close();
