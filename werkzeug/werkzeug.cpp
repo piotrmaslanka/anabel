@@ -7,6 +7,7 @@
 using namespace std;
 void display_usage_information() {
 	cout << "Werkzeug version 1.0" << endl << "Copyright (c) 2012 Piotr Maslanka" << "Part of Anabel time-series database" << endl;
+	cout << " -- THIS IS BUT A SIMPLE WRAPPER. WATCH YOUR INPUT!!! -- " << endl;
 	cout << "Available types: int32 float int8" << endl;
 	cout << " Normalizing two timeseries, performing an operation and store the results:" << endl << endl;
 	cout << "     anabel-werkzeug nos <path_to_db_1> <path_to_db_2> <db_1_timestamp_start> <db_1_timestamp_end>";
@@ -19,6 +20,9 @@ void display_usage_information() {
 	cout << "     anabel-werkzeug view <path_to_db> <timestamp_start> <timestamp_end> <type>" << endl;
 	cout << " Appending to a timeseries" << endl << endl;
 	cout << "     anabel-werkzeug append <path_to_db> <timestamp> <value> <type>" << endl;
+	cout << " Creating a new database" << endl << endl;
+	cout << "     anabel-werkzeug create <path_to_db> <record_size>" << endl;
+
 	system("pause");
 }
 
@@ -29,7 +33,7 @@ int main(int argc, char* argv[])
 		if (argc != 3) { display_usage_information(); return 1; }
 		return indent(argv[2]);
 	}
-	if (strcmp(argv[1], "no")==0) {
+	if (strcmp(argv[1], "nos")==0) {
 		if (argc != 11) { display_usage_information(); return 1; }
 		string db1_path = argv[2];
 		string db2_path = argv[3];
@@ -60,7 +64,13 @@ int main(int argc, char* argv[])
 		stringstream(argv[4]) >> t_to;
 		if (t_to < t_from) return 4;
 		return view(argv[2], t_from, t_to, argv[5]);
+	}
 
+	if (strcmp(argv[1], "create")==0) {
+		if (argc != 4) { display_usage_information(); return 1; }
+		int record_size;
+		stringstream(argv[3]) >> record_size;
+		return create(argv[2], record_size);
 	}
 
 	system("pause");

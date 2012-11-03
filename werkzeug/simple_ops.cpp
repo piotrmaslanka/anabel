@@ -1,7 +1,6 @@
 #include <anabel/anabel.h>
 #include <iostream>
 #include <sstream>
-#include "base_checks.h"
 using namespace Anabel;
 
 int indent(char * db_to_indent) {
@@ -17,6 +16,10 @@ int indent(char * db_to_indent) {
 	return 0;
 }
 
+int create(char * db_path, int record_size) {
+	Anabel::TimeSeries::create(db_path, record_size);
+	return 0;
+}
 
 template <class T>
 int view_t(Anabel::ReadQuery rq, T referential_type, int record_size) {
