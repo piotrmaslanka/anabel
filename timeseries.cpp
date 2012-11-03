@@ -52,6 +52,7 @@ Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation) {
 	// Sanity checks
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
+	if (from>to) throw InvalidInvocation("from>to");
 
 	typedef vector<Timestamp> timevector;
 	typedef vector<Timestamp>::iterator timevectoriter;
