@@ -82,6 +82,7 @@ unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time,
 		imid = imin + (imax-imin)/2;
 		this->seekg(8+imid*(8+this->record_size), std::ios::beg);
 		this->read((char*)(&temp), 8);
+		if ((imid == 0) || (imid == imax)) return imid;	// finish search, it's pointless
 		if (temp < time)
 			imin = imid + 1;
 		else if (temp > time)
