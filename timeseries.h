@@ -28,7 +28,7 @@ namespace Anabel {
 	};
 
 	class AppendingSession {
-		friend TimeSeries;
+		friend class TimeSeries;
 		private:
 			std::ofstream * fhandle;
 			int record_size;

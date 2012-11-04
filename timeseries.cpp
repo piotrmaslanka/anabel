@@ -288,7 +288,7 @@ Anabel::AppendingSession Anabel::TimeSeries::get_appending_session() throw(Anabe
 	}
 
 	ofstream * k = new ofstream(path.string().c_str(), std::ios::binary | std::ios::app);
-	return AppendingSession(k, this->record_size);
+	return Anabel::AppendingSession(k, this->record_size);
 }
 
 Anabel::AppendingSession::AppendingSession(std::ofstream * fhandle, int record_size) : fhandle(fhandle), record_size(record_size) {}
