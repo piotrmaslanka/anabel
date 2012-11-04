@@ -3,6 +3,7 @@
 #include <sstream>
 #include <anabel/anabel.h>
 #include "simple_ops.h"
+#include "normalize_aggregate_store.h"
 
 using namespace std;
 void display_usage_information() {
@@ -10,7 +11,7 @@ void display_usage_information() {
 	cout << " -- THIS IS BUT A SIMPLE WRAPPER. WATCH YOUR INPUT!!! -- " << endl;
 	cout << "Available types: int32 float int8" << endl;
 	cout << " Normalizing two timeseries, performing an operation and store the results:" << endl << endl;
-	cout << "     anabel-werkzeug nos <path_to_db_1> <path_to_db_2> <db_1_timestamp_start> <db_1_timestamp_end>";
+	cout << "     anabel-werkzeug normalize-aggregate-store <path_to_db_1> <path_to_db_2> <db_1_timestamp_start> <db_1_timestamp_end>";
 	cout << "<db_2_timestamp_start> <db_2_timestamp_end> <operation> <type> <output_database_path>" << endl << endl;
 	cout << "  Operation is one of: " << endl << "   add - Adds corresponding records" << "   sub - Substracts corresponding records" << endl;
 	cout << "  Databases must have matching types. Output will have the same type. "<<endl;
@@ -30,10 +31,10 @@ int main(int argc, char* argv[])
 {
 	if (argc < 3) { display_usage_information(); return 1; }
 	if (strcmp(argv[1], "indent")==0) {
-		if (argc != 3) { display_usage_information(); return 1; }
+		if (argc != 3)
 		return indent(argv[2]);
 	}
-	if (strcmp(argv[1], "nos")==0) {
+	if (strcmp(argv[1], "normalize-aggregate-store")==0) {
 		if (argc != 11) { display_usage_information(); return 1; }
 		string db1_path = argv[2];
 		string db2_path = argv[3];

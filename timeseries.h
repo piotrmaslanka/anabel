@@ -54,7 +54,7 @@ namespace Anabel {
 			* Opens the database in given mode
 			* Will wait if database is locked.
 			*/
-			void open(TimeSeriesOpenMode open_mode) throw(Anabel::Exceptions::InvalidInvocation);;
+			void open(TimeSeriesOpenMode open_mode) throw(Anabel::Exceptions::InvalidInvocation);
 			void close(void);
 
 			/**
