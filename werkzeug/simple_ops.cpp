@@ -81,7 +81,6 @@ int append(char * db_path, Anabel::Timestamp timestamp, std::string value, char 
 	ts->append((void*)absurdity_of_life);
 
 	free(absurdity_of_life);
-	ts->close();
 	return 0;
 }
 
