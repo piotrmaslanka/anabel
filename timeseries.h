@@ -27,7 +27,6 @@ namespace Anabel {
 		TSO_WRITE,
 	};
 
-
 	class AppendingSession {
 		friend TimeSeries;
 		private:
@@ -35,69 +34,91 @@ namespace Anabel {
 			int record_size;
 			AppendingSession(std::ofstream * fhandle, int record_size);
 		public:
+			/**
+			Closes the appending session. After that, no more data can be appended
+			*/
 			void close();
+			/**
+			Append one item of data. buffer is in Buffer Format
+			If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
+			*/
 			void append(void * buffer);
+			/**
+			Append many records. buffer is in Buffer Format, and is array of at least count items.
+			Data must be ordered ascending, and if the smallest timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
+			*/
 			void append_many(void * buffer, int count);
 			~AppendingSession();
 	};
 
+	/**
+	Main class representing a timeseries.
+	
+	FOREWORD
+	Buffer Format is an array of 1 or more entries in format:
+	   #pragma pack(1)
+	   struct buffer {
+	        Anabel::Timestamp timestamp;
+	        your_favourite_type value;
+	   };
+	
+	Learn to love it, you will be passing a lot of it in and out.
+	*/
 	class TimeSeries {
 		private:
 			boost::interprocess::file_lock * alock;
 			boost::interprocess::file_lock * block;
 			boost::filesystem::path root_path;
 		public:
+			/** 
+			Size of value, in bytes
+			*/
 			int record_size;
-			TimeSeriesOpenMode mode; // don't modify from userland
+			TimeSeriesOpenMode mode;
 			TimeSeries(char * rootdirpath) throw(Anabel::Exceptions::InvalidRootDirectory);
 			~TimeSeries();
+			/**
+			Creates and returns a new appending session. Timeseries must be open in TSO_WRITE or TSO_APPEND
+			*/
 			Anabel::AppendingSession get_appending_session() throw(Anabel::Exceptions::InvalidInvocation);
+			/**
+			Returns a new ReadQuery instance representing value of query made. Timeseries must be open in TSO_WRITE or TSO_READ
+			*/
 			Anabel::ReadQuery get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
-			* Appends a piece of data to the database.
-			* If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
-			* Value is in form:
-			*    #pragma pack(1)
-			*    struct buffer {
-			*         Anabel::Timestamp timestamp;
-			*         your_favourite_type value;
-			*    };
-
+			Appends a single piece of data to the database. Data must be in Buffer Format.
+			If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
+			
 			*/
 			void append(void * value) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
-			* Opens the database in given mode
-			* Will wait if database is locked.
+			Opens the database in given mode
+			Will wait if database is locked.
 			*/
 			void open(TimeSeriesOpenMode open_mode) throw(Anabel::Exceptions::InvalidInvocation);
 			void close(void);
 
 			/**
-			* Creates a new, empty database, whose root directory is specified by rootdirpath.
-			* Will create rootdirpath if it doesn't exist
+			Creates a new, empty database, whose root directory is specified by rootdirpath.
+			Will create rootdirpath if it doesn't exist. Will wipe existing stuff at rootdirpath if it exists.
 			*/
 			static void create(char * rootdirpath, int record_size);
 			/**
-			* Clears the database. 
-			* Requires database to be open in TSO_WRITE mode
+			Clears the database. 
+			Requires database to be open in TSO_WRITE mode
 			*/
 			void truncate(void) throw(Anabel::Exceptions::InvalidInvocation);
 
 			/**
-			* Creates a new, empty data set in time series' root directory
-			* Requires the database to be open in TSO_WRITE or TSO_APPEND mode.
-			* Will return with nothing if current highest-numbered dataset is empty
+			Creates a new, empty data set in time series' root directory
+			Requires the database to be open in TSO_WRITE or TSO_APPEND mode.
+			Will return with nothing if current highest-numbered dataset is empty
 			*/
 			void indent(void) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
-			* Returns last entry in given database
-			* Returns true if entry was found - else if the DB is empty
-			* Buffer is in form:
-			*    #pragma pack(1)
-			*    struct buffer {
-			*         Anabel::Timestamp timestamp;
-			*         your_favourite_type value;
-			*    };
+			Returns last entry in given database
+			Returns true if entry was found - else if the DB is empty
+			Buffer is in Buffer Format.
 			**/
 			bool get_last(void * buffer) throw(Anabel::Exceptions::InvalidInvocation);
 	};

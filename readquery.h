@@ -22,7 +22,8 @@
 
 namespace Anabel {	
 	/**
-	* Class that represents a query made against a particular Anabel data set.
+	Class that represents a query made against a particular Anabel data set.
+	Refer to Anabel::TimeSeries foreword on what Buffer Format is.
 	*/
 	class ReadQuery {
 		friend class TimeSeries;
@@ -37,7 +38,6 @@ namespace Anabel {
 			unsigned desired_cache_size;
 			bool first_readed;
 			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> files, int record_size);
-
 			/**
 			Load desired_cache_size from cache, if it's empty.
 			If there are no more files to process, do nothing.
@@ -49,7 +49,14 @@ namespace Anabel {
 			*/
 			unsigned ll_get_data(unsigned count, void * buffer);
 		public:
+			/**
+			Returns next piece of data. buffer data will be in Buffer Format. buffer must have room to accomodate at least count records
+			*/
 			unsigned get_data(unsigned count, void * buffer);
+			/**
+			Sets internal buffer size. Useful if you have loads of records in a single file, for performance reasons.
+			In everyday programming, you don't need to use it. Default value is 20000.
+			*/
 			void set_desired_cache_size(unsigned elements);
 			~ReadQuery();
 
