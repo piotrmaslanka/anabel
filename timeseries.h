@@ -27,6 +27,20 @@ namespace Anabel {
 		TSO_WRITE,
 	};
 
+
+	class AppendingSession {
+		friend TimeSeries;
+		private:
+			std::ofstream * fhandle;
+			int record_size;
+			AppendingSession(std::ofstream * fhandle, int record_size);
+		public:
+			void close();
+			void append(void * buffer);
+			void append_many(void * buffer, int count);
+			~AppendingSession();
+	};
+
 	class TimeSeries {
 		private:
 			boost::interprocess::file_lock * alock;
@@ -37,6 +51,7 @@ namespace Anabel {
 			TimeSeriesOpenMode mode; // don't modify from userland
 			TimeSeries(char * rootdirpath) throw(Anabel::Exceptions::InvalidRootDirectory);
 			~TimeSeries();
+			Anabel::AppendingSession get_appending_session() throw(Anabel::Exceptions::InvalidInvocation);
 			Anabel::ReadQuery get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			* Appends a piece of data to the database.

@@ -131,17 +131,7 @@ void Anabel::TimeSeries::truncate(void) throw(Anabel::Exceptions::InvalidInvocat
 }
 
 void Anabel::TimeSeries::append(void * value) throw(Anabel::Exceptions::InvalidInvocation) {
-	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
-
-	path path(this->root_path);
-	while (!is_regular_file(path)) {
-		vector<Timestamp> elements = scan_directory(path);
-		path /= timestamp_to_string(*max_element(elements.begin(), elements.end()));
-	}
-
-	ofstream file(path.string().c_str(), std::ios::binary | std::ios::app);
-	file.write((char*)value, 8+this->record_size);
-	file.close();
+	this->get_appending_session().append(value);
 }
 
 void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) throw(Anabel::Exceptions::InvalidInvocation) {
@@ -286,3 +276,36 @@ Anabel::TimeSeries::~TimeSeries() {
 	delete this->alock;
 	delete this->block;
 }
+
+
+Anabel::AppendingSession Anabel::TimeSeries::get_appending_session() throw(Anabel::Exceptions::InvalidInvocation) {
+	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
+
+	path path(this->root_path);
+	while (!is_regular_file(path)) {
+		vector<Timestamp> elements = scan_directory(path);
+		path /= timestamp_to_string(*max_element(elements.begin(), elements.end()));
+	}
+
+	ofstream * k = new ofstream(path.string().c_str(), std::ios::binary | std::ios::app);
+	return AppendingSession(k, this->record_size);
+}
+
+Anabel::AppendingSession::AppendingSession(std::ofstream * fhandle, int record_size) : fhandle(fhandle), record_size(record_size) {}
+
+void Anabel::AppendingSession::close() {
+	this->fhandle->close();
+	delete this->fhandle;
+}
+
+Anabel::AppendingSession::~AppendingSession() {
+	if (this->fhandle != NULL) this->close();
+}
+
+void Anabel::AppendingSession::append(void * buffer) {
+	this->append_many(buffer, 1);
+}
+void Anabel::AppendingSession::append_many(void * buffer, int count) {
+	this->fhandle->write((char*)buffer, (8+this->record_size)*count);
+}
+
