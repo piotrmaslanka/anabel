@@ -36,10 +36,10 @@ int normalize_aggregate_store(char * db_path1, char * db_path2, Anabel::Timestam
 	db2->open(TSO_READ);
 	dbo->open(TSO_APPEND);
 
-	ReadQuery rdb1 = db1->get_query(db1_from, db1_to);
-	ReadQuery rdb2 = db1->get_query(db2_from, db2_to);
+	ReadQuery * rdb1 = db1->get_query(db1_from, db1_to);
+	ReadQuery * rdb2 = db1->get_query(db2_from, db2_to);
 
-	if (strcmp(commontype, "int8")==0) return normalize_aggregate_store_t(rdb1, rdb2, *dbo, operation, (char)0);
-	if (strcmp(commontype, "float")==0) return normalize_aggregate_store_t(rdb1, rdb2, *dbo, operation, (float)0);
-	if (strcmp(commontype, "int32")==0) return normalize_aggregate_store_t(rdb1, rdb2, *dbo, operation, (int)0);
+	if (strcmp(commontype, "int8")==0) return normalize_aggregate_store_t(*rdb1, *rdb2, *dbo, operation, (char)0);
+	if (strcmp(commontype, "float")==0) return normalize_aggregate_store_t(*rdb1, *rdb2, *dbo, operation, (float)0);
+	if (strcmp(commontype, "int32")==0) return normalize_aggregate_store_t(*rdb1, *rdb2, *dbo, operation, (int)0);
 }

@@ -52,7 +52,7 @@ Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 	throw InternalError("needle not found");
 }
 
-Anabel::ReadQuery Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation) {
+Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation) {
 	// Sanity checks
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 	if (from>to) throw InvalidInvocation("from>to");
@@ -77,12 +77,12 @@ Anabel::ReadQuery Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::
 		}
 	} catch (InternalError e) {
 		// query empty.
-		return Anabel::ReadQuery(from, to, files, this->record_size);
+		return new Anabel::ReadQuery(from, to, files, this->record_size);
 	}
 
 	files.push_back(cpath);
 	if (choice <= from) {
-		return Anabel::ReadQuery(from, to, files, this->record_size);	// response is a single-file wonder
+		return new Anabel::ReadQuery(from, to, files, this->record_size);	// response is a single-file wonder
 	}
 
 	cpath = cpath.parent_path();
@@ -119,7 +119,7 @@ Anabel::ReadQuery Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::
 		}
 	}
 
-	return Anabel::ReadQuery(from, to, files, this->record_size);
+	return new Anabel::ReadQuery(from, to, files, this->record_size);
 }
 
 void Anabel::TimeSeries::truncate(void) throw(Anabel::Exceptions::InvalidInvocation) {
@@ -131,7 +131,9 @@ void Anabel::TimeSeries::truncate(void) throw(Anabel::Exceptions::InvalidInvocat
 }
 
 void Anabel::TimeSeries::append(void * value) throw(Anabel::Exceptions::InvalidInvocation) {
-	this->get_appending_session().append(value);
+	AppendingSession * as = get_appending_session();
+	as->append(value);
+	delete as;
 }
 
 void Anabel::TimeSeries::open(TimeSeriesOpenMode open_mode) throw(Anabel::Exceptions::InvalidInvocation) {
@@ -278,7 +280,7 @@ Anabel::TimeSeries::~TimeSeries() {
 }
 
 
-Anabel::AppendingSession Anabel::TimeSeries::get_appending_session() throw(Anabel::Exceptions::InvalidInvocation) {
+Anabel::AppendingSession * Anabel::TimeSeries::get_appending_session() throw(Anabel::Exceptions::InvalidInvocation) {
 	if ((this->mode != TSO_APPEND) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 
 	path path(this->root_path);
@@ -287,15 +289,17 @@ Anabel::AppendingSession Anabel::TimeSeries::get_appending_session() throw(Anabe
 		path /= timestamp_to_string(*max_element(elements.begin(), elements.end()));
 	}
 
-	ofstream * k = new ofstream(path.string().c_str(), std::ios::binary | std::ios::app);
-	return Anabel::AppendingSession(k, this->record_size);
+	return new Anabel::AppendingSession(path, this->record_size);
 }
 
-Anabel::AppendingSession::AppendingSession(std::ofstream * fhandle, int record_size) : fhandle(fhandle), record_size(record_size) {}
+Anabel::AppendingSession::AppendingSession(boost::filesystem::path path, int rec_size) : record_size(record_size) {
+	this->fhandle = new ofstream(path.c_str(), std::ios::binary | std::ios::app);
+}
 
 void Anabel::AppendingSession::close() {
 	this->fhandle->close();
 	delete this->fhandle;
+	this->fhandle = NULL;
 }
 
 Anabel::AppendingSession::~AppendingSession() {

@@ -94,12 +94,14 @@ int view(char * db_path, Anabel::Timestamp t_from, Anabel::Timestamp t_to, char 
 
 	ts->open(TSO_READ);
 
-	Anabel::ReadQuery rq = ts->get_query(t_from, t_to);	// validity was checked earlier
+	Anabel::ReadQuery * rq = ts->get_query(t_from, t_to);	// validity was checked earlier
 
 	int return_value;
-	if (strcmp("int32", commontype)==0) return_value = view_t(rq, (int)0, ts->record_size);
-	if (strcmp("int8", commontype)==0) return_value = view_t(rq, (char)0, ts->record_size);
-	if (strcmp("float", commontype)==0) return_value = view_t(rq, (float)0, ts->record_size);
+	if (strcmp("int32", commontype)==0) return_value = view_t(*rq, (int)0, ts->record_size);
+	if (strcmp("int8", commontype)==0) return_value = view_t(*rq, (char)0, ts->record_size);
+	if (strcmp("float", commontype)==0) return_value = view_t(*rq, (float)0, ts->record_size);
+
+	delete rq;
 
 	return return_value;
 }

@@ -32,7 +32,7 @@ namespace Anabel {
 		private:
 			std::ofstream * fhandle;
 			int record_size;
-			AppendingSession(std::ofstream * fhandle, int record_size);
+			AppendingSession(boost::filesystem::path path, int rec_size);
 		public:
 			/**
 			Closes the appending session. After that, no more data can be appended
@@ -80,11 +80,11 @@ namespace Anabel {
 			/**
 			Creates and returns a new appending session. Timeseries must be open in TSO_WRITE or TSO_APPEND
 			*/
-			Anabel::AppendingSession get_appending_session() throw(Anabel::Exceptions::InvalidInvocation);
+			Anabel::AppendingSession * get_appending_session() throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			Returns a new ReadQuery instance representing value of query made. Timeseries must be open in TSO_WRITE or TSO_READ
 			*/
-			Anabel::ReadQuery get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation);
+			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			Appends a single piece of data to the database. Data must be in Buffer Format.
 			If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
