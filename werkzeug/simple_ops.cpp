@@ -2,10 +2,11 @@
 #include <iostream>
 #include <sstream>
 using namespace Anabel;
+using namespace std;
 
 int indent(char * db_to_indent) {
 	try {
-		Anabel::TimeSeries ts(db_to_indent);
+		TimeSeries ts(db_to_indent);
 		ts.open(TSO_APPEND);
 		ts.indent();
 		ts.close();
@@ -17,20 +18,17 @@ int indent(char * db_to_indent) {
 }
 
 int create(char * db_path, int record_size) {
-	Anabel::TimeSeries::create(db_path, record_size);
+	TimeSeries::create(db_path, record_size);
 	return 0;
 }
 
 template <class T>
 int view_t(Anabel::ReadQuery rq, T referential_type, int record_size) {
-	if (sizeof(T) != record_size) {
-		std::cout<<"Type doesnt match";
-		return 3;		// invalid type
-	}
+	if (sizeof(T) != record_size) return 3;		// invalid type
 
 #pragma pack(push, 1)
 	struct _e_struct {
-		Anabel::Timestamp timestamp;
+		Timestamp timestamp;
 		T value;
 	};
 #pragma pack(pop)
@@ -48,19 +46,18 @@ int view_t(Anabel::ReadQuery rq, T referential_type, int record_size) {
 }
 
 int append(char * db_path, Anabel::Timestamp timestamp, std::string value, char * commontype) {
-	Anabel::TimeSeries * ts;
+	auto_ptr<TimeSeries> ts;
 	try {
-		ts = new Anabel::TimeSeries(db_path);
+		ts = auto_ptr<TimeSeries>(new TimeSeries(db_path));
 	} catch (Anabel::Exceptions::InvalidRootDirectory) {
-		std::cout << "ERROR: Invalid directory" << std::endl;
 		return 2;
 	}
 
 	ts->open(TSO_APPEND);
 
-	if ((strcmp(commontype, "float")==0) && (ts->record_size != 4)) { delete ts; return 3; }
-	if ((strcmp(commontype, "int32")==0) && (ts->record_size != 4)) { delete ts; return 3; }
-	if ((strcmp(commontype, "int8")==0) && (ts->record_size != 1)) { delete ts; return 3; }
+	if ((strcmp(commontype, "float")==0) && (ts->record_size != 4)) return 3;
+	if ((strcmp(commontype, "int32")==0) && (ts->record_size != 4)) return 3;
+	if ((strcmp(commontype, "int8")==0) && (ts->record_size != 1)) return 3;
 
 	char * absurdity_of_life = (char*)malloc(8+ts->record_size);
 	*(Anabel::Timestamp*)absurdity_of_life = timestamp;
@@ -85,16 +82,14 @@ int append(char * db_path, Anabel::Timestamp timestamp, std::string value, char 
 
 	free(absurdity_of_life);
 	ts->close();
-	delete ts;
 	return 0;
 }
 
 int view(char * db_path, Anabel::Timestamp t_from, Anabel::Timestamp t_to, char * commontype) {
-	Anabel::TimeSeries * ts;
+	auto_ptr<TimeSeries> ts;
 	try {
-		ts = new Anabel::TimeSeries(db_path);
+		ts = auto_ptr<TimeSeries>(new TimeSeries(db_path));
 	} catch (Anabel::Exceptions::InvalidRootDirectory) {
-		std::cout << "ERROR: Invalid directory" << std::endl;
 		return 2;
 	}
 
@@ -108,6 +103,5 @@ int view(char * db_path, Anabel::Timestamp t_from, Anabel::Timestamp t_to, char 
 	if (strcmp("float", commontype)==0) return_value = view_t(*rq, (float)0, ts->record_size);
 
 	delete rq;
-	delete ts;
 	return return_value;
 }
