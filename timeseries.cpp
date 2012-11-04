@@ -52,7 +52,7 @@ Timestamp choose(vector<Timestamp> haystack, Timestamp needle) {
 	throw InternalError("needle not found");
 }
 
-Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation) {
+Anabel::ReadQuery Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation) {
 	// Sanity checks
 	if ((this->mode != TSO_READ) && (this->mode != TSO_WRITE)) throw InvalidInvocation("invalid open mode");
 	if (from>to) throw InvalidInvocation("from>to");
@@ -77,12 +77,12 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		}
 	} catch (InternalError e) {
 		// query empty.
-		return new Anabel::ReadQuery(from, to, files, this->record_size);
+		return Anabel::ReadQuery(from, to, files, this->record_size);
 	}
 
 	files.push_back(cpath);
 	if (choice <= from) {
-		return new Anabel::ReadQuery(from, to, files, this->record_size);	// response is a single-file wonder
+		return Anabel::ReadQuery(from, to, files, this->record_size);	// response is a single-file wonder
 	}
 
 	cpath = cpath.parent_path();
@@ -119,7 +119,7 @@ Anabel::ReadQuery * Anabel::TimeSeries::get_query(Anabel::Timestamp from, Anabel
 		}
 	}
 
-	return new Anabel::ReadQuery(from, to, files, this->record_size);
+	return Anabel::ReadQuery(from, to, files, this->record_size);
 }
 
 void Anabel::TimeSeries::truncate(void) throw(Anabel::Exceptions::InvalidInvocation) {

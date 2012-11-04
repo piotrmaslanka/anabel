@@ -37,7 +37,7 @@ namespace Anabel {
 			TimeSeriesOpenMode mode; // don't modify from userland
 			TimeSeries(char * rootdirpath) throw(Anabel::Exceptions::InvalidRootDirectory);
 			~TimeSeries();
-			Anabel::ReadQuery * get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation);
+			Anabel::ReadQuery get_query(Anabel::Timestamp from, Anabel::Timestamp to) throw(Anabel::Exceptions::InvalidInvocation);
 			/**
 			* Appends a piece of data to the database.
 			* If timestamp is smaller than maximum timestamp present in the database, behaviour is undefined
