@@ -57,7 +57,7 @@ vector<Timestamp> Anabel::Internal::scan_directory(boost::filesystem::path direc
 	return files;
 }
 
-Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem::path path, unsigned record_size) : record_size(record_size), start_at_ofs(8) {
+Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem::path path, unsigned record_size) : record_size(record_size), start_at_ofs(8), start_at_record(0) {
 	this->open(path.string().c_str(), std::ios::binary);
 	this->seekg(0, std::ios::end);
 	this->end_at_ofs = (unsigned)(this->tellg());		// end of file
@@ -73,43 +73,70 @@ Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem
 	this->total_records = this->records_remaining;
 
 }
-unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time, bool round_up) {
+unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time, bool is_start) {
 	Anabel::Timestamp temp;
 	unsigned imin = 0;
 	unsigned imax = this->total_records - 1;
+	unsigned amax = imax;
 	unsigned imid;
+	
 	while (imax >= imin) {
-		imid = imin + (imax-imin)/2;
+		imid = imin + ((imax - imin) / 2);
 		this->seekg(8+imid*(8+this->record_size), std::ios::beg);
 		this->read((char*)(&temp), 8);
-		if ((imid == 0) || (imid == imax)) return imid;	// finish search, it's pointless
-		if (temp < time)
+		if (temp == time) return imid;
+		if (temp < time) {
+			if (imid == amax)
+				// range exhausted.
+				if (is_start) throw (int)1;	// start past last record? nonsense;
+				else return amax;
+
 			imin = imid + 1;
-		else if (temp > time)
+		} else {
+			if (imid == 0) // range exhausted.
+				if (is_start) {
+					return 0;
+				} else throw (int)1;	// stop before first record? nonsense.
+
 			imax = imid - 1;
-		else
-			return imid;
+		}
 	}
-	// Value not found. We have to approximate.
-	if (round_up) {
-			// we will try to get to next record, if it exits...
-		if (imid == (this->total_records-1)) return imid; // it doesn't
-		return imid+1;
+
+	// not found and in range. Attempt to interpolate
+	if (is_start) {
+		if (temp < time) return imid+1;
+		else return imid;
+	} else {
+		if (temp < time) return imid;
+		else return imid-1;
 	}
-	return imid;
+
+	// We shouldn't ever get here!
+	throw Anabel::Exceptions::InternalError("Program should not fail like this! Report this error to the developer.");
 }
 void Anabel::Internal::IntelligentFileReader::prepare_read(void) {
 	this->seekg(this->start_at_ofs);
 }
 void Anabel::Internal::IntelligentFileReader::limit_start(Anabel::Timestamp start) {
 	if (this->records_remaining == 0) return;
-	unsigned x = this->locate(start, true);
-	this->start_at_ofs = x*(8+this->record_size) + 8;
+	try {
+		this->start_at_record = this->locate(start, true);
+	} catch (int) {
+		this->records_remaining = 0;	// data not found here
+		return;
+	}
+	this->start_at_ofs = this->start_at_record*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {
 	if (this->records_remaining == 0) return;
-	unsigned x = this->locate(stop, false);
+	unsigned x;
+	try {
+		x = this->locate(stop, false);
+	} catch (int) {
+		this->records_remaining = 0;
+		return;
+	}
 
 	this->end_at_ofs = (1+x)*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
