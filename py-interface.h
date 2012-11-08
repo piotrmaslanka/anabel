@@ -18,15 +18,6 @@
 #include <anabel/anabel.h>
 
 namespace Anabel {
-#pragma pack(push)
-#pragma pack(1)
-	template<class T>
-	struct Record {
-		Anabel::Timestamp timestamp;
-		T value;
-	};
-#pragma pack(pop)
-
 	void * allocate_buffer(unsigned record_size, unsigned amount);
 	void deallocate_buffer(void * buffer);
 	void extract_timestamps(unsigned long long * outvec, unsigned amount, void * buffer, unsigned record_size);

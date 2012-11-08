@@ -103,12 +103,15 @@ void Anabel::Internal::IntelligentFileReader::prepare_read(void) {
 }
 void Anabel::Internal::IntelligentFileReader::limit_start(Anabel::Timestamp start) {
 	if (this->records_remaining == 0) return;
-	this->start_at_ofs = this->locate(start, true)*(8+this->record_size) + 8;
+	unsigned x = this->locate(start, true);
+	this->start_at_ofs = x*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {
 	if (this->records_remaining == 0) return;
-	this->end_at_ofs = (1+this->locate(stop, false))*(8+this->record_size) + 8;
+	unsigned x = this->locate(stop, false);
+
+	this->end_at_ofs = (1+x)*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
 unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_read, void * buffer) {

@@ -4,6 +4,9 @@ using namespace std;
 
 template <class T>
 int normalize_aggregate_store_t(ReadQuery rq1, ReadQuery rq2, TimeSeries output, char * operation, T referential_type) {
+
+	return 0;
+
 }
 
 

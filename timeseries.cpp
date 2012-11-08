@@ -292,7 +292,7 @@ Anabel::AppendingSession * Anabel::TimeSeries::get_appending_session() throw(Ana
 	return new Anabel::AppendingSession(path, this->record_size);
 }
 
-Anabel::AppendingSession::AppendingSession(boost::filesystem::path path, int rec_size) : record_size(record_size) {
+Anabel::AppendingSession::AppendingSession(boost::filesystem::path path, int rec_size) : record_size(rec_size) {
 	this->fhandle = new ofstream(path.c_str(), std::ios::binary | std::ios::app);
 }
 

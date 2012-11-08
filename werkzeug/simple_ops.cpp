@@ -23,9 +23,8 @@ int create(char * db_path, int record_size) {
 }
 
 template <class T>
-int view_t(Anabel::ReadQuery rq, T referential_type, int record_size) {
+int view_t(Anabel::ReadQuery & rq, T referential_type, int record_size) {
 	if (sizeof(T) != record_size) return 3;		// invalid type
-
 #pragma pack(push, 1)
 	struct _e_struct {
 		Timestamp timestamp;
@@ -102,6 +101,6 @@ int view(char * db_path, Anabel::Timestamp t_from, Anabel::Timestamp t_to, char 
 	if (strcmp("float", commontype)==0) return_value = view_t(*rq, (float)0, ts->record_size);
 
 	delete rq;
-
+	system("pause");
 	return return_value;
 }
