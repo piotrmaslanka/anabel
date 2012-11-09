@@ -11,4 +11,4 @@ Anabel is concurrency-safe via advisory locking. All simple operations do not pr
 
 Anabel's on-disk binary format is very simple and capable of storing absurd amounts of data. It uses very little space comparing to putting the same data in a RDBMS.
 
-Because Anabel is a library, getting the most out of it would require writing a program to interface with it. However, a simple command-line program - "werkzeug" - is attached. It can perform most simple operations on the database, and in a pinch can be used to do full interfacing with it. It can be also used to do some other nifty stuff, some quite complex.
+Because Anabel is a library, getting the most out of it would require writing a program to interface with it. However, a simple command-line program - "werkzeug" - is attached. It can perform most simple operations on the database, and in a pinch can be used to do full interfacing with it.

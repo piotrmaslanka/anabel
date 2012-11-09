@@ -3,18 +3,12 @@
 #include <sstream>
 #include <anabel/anabel.h>
 #include "simple_ops.h"
-#include "normalize_aggregate_store.h"
 
 using namespace std;
 void display_usage_information() {
 	cout << "Werkzeug version 1.0" << endl << "Copyright (c) 2012 Piotr Maslanka" << "Part of Anabel time-series database" << endl;
 	cout << " -- THIS IS BUT A SIMPLE WRAPPER. WATCH YOUR INPUT!!! -- " << endl;
 	cout << "Available types: int32 float int8" << endl;
-	cout << " Normalizing two timeseries, performing an operation and store the results:" << endl << endl;
-	cout << "     anabel-werkzeug normalize-aggregate-store <path_to_db_1> <path_to_db_2> <db_1_timestamp_start> <db_1_timestamp_end>";
-	cout << "<db_2_timestamp_start> <db_2_timestamp_end> <operation> <type> <output_database_path>" << endl << endl;
-	cout << "  Operation is one of: " << endl << "   add - Adds corresponding records" << "   sub - Substracts corresponding records" << endl;
-	cout << "  Databases must have matching types. Output will have the same type. "<<endl;
 	cout << " Indenting a timeseries"<< endl << endl;
 	cout << "     anabel-werkzeug indent <path_to_db>" << endl;
 	cout << " Viewing a timeseries" << endl << endl;
@@ -34,7 +28,7 @@ int main(int argc, char* argv[])
 		if (argc != 3)
 		return indent(argv[2]);
 	}
-	if (strcmp(argv[1], "normalize-aggregate-store")==0) {
+	if (strcmp(argv[1], "lerp-aggregate-store")==0) {
 		if (argc != 11) { display_usage_information(); return 1; }
 		string db1_path = argv[2];
 		string db2_path = argv[3];
