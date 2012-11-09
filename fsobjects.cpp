@@ -140,7 +140,7 @@ void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) 
 	this->end_at_ofs = (1+x)*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
-unsigned Anabel::Internal::IntelligentFileReader::get_data(size_t records_to_read, void * buffer) {
+size_t Anabel::Internal::IntelligentFileReader::get_data(size_t records_to_read, void * buffer) {
 	if (records_to_read > this->records_remaining) records_to_read = records_remaining;
 	this->read((char*)buffer, records_to_read*(8 + this->record_size));
 	this->records_remaining -= records_to_read;
