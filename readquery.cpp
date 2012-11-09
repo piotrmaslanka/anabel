@@ -30,6 +30,7 @@ Anabel::BigDataBlock Anabel::ReadQuery::read_everything() {
 
 	while (true) {
 		size_t records_readed = this->get_data(this->desired_cache_size, chunk_buffer);
+		if (records_readed == 0) break;
 		bb.entries_readed += records_readed;
 		size_t mem_for_records = (8+this->record_size)*records_readed;
 		bb.buffer_length += mem_for_records;

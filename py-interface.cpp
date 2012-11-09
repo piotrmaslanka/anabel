@@ -24,6 +24,6 @@ void Anabel::extract_timestamps(unsigned long long * outvec, unsigned amount, vo
 	Anabel::Timestamp * pval = (Anabel::Timestamp*)buffer;
 		for (unsigned i=0; i<amount; i++) {
 			outvec[i] = *pval;
-			pval = (Anabel::Timestamp*)(((char*)pval) + record_size);
+			pval = (Anabel::Timestamp*)(((char*)pval) + record_size + 8);
 		}
 }
