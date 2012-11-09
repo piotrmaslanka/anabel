@@ -25,6 +25,13 @@ namespace Anabel {
 	Class that represents a query made against a particular Anabel data set.
 	Refer to Anabel::TimeSeries foreword on what Buffer Format is.
 	*/
+
+	struct BigDataBlock {
+		void * buffer;
+		size_t buffer_length;
+		size_t entries_readed;
+	};
+
 	class ReadQuery {
 		friend class TimeSeries;
 		private:
@@ -34,8 +41,8 @@ namespace Anabel {
 			Anabel::Internal::IntelligentFileReader * opened_file;			
 			void * data_cache;
 			void * cache_ofs;
-			unsigned available_cache_entries;
-			unsigned desired_cache_size;
+			size_t available_cache_entries;
+			size_t desired_cache_size;
 			bool first_readed;
 			ReadQuery(Anabel::Timestamp from, Anabel::Timestamp to, std::vector<boost::filesystem::path> files, int record_size);
 			/**
@@ -47,17 +54,30 @@ namespace Anabel {
 			Low-level data reader.
 			Extracts data from input. Returns zero on no more data. Does nothing with cache
 			*/
-			unsigned ll_get_data(unsigned count, void * buffer);
+			size_t ll_get_data(size_t count, void * buffer);
 		public:
 			/**
 			Returns next piece of data. buffer data will be in Buffer Format. buffer must have room to accomodate at least count records
 			*/
-			unsigned get_data(unsigned count, void * buffer);
+			size_t get_data(size_t count, void * buffer);
 			/**
 			Sets internal buffer size. Useful if you have loads of records in a single file, for performance reasons.
 			In everyday programming, you don't need to use it. Default value is 20000.
 			*/
-			void set_desired_cache_size(unsigned elements);
+			void set_desired_cache_size(size_t elements);
+			/**
+			* Returns current cache size in elements
+			*/
+			size_t get_cache_size();
+			/**
+			* Reads in all data, in cache-sized chunks.
+			* WARNING!
+			*   If you have invoked this, you will realize that Anabel has no way of knowing in advance how much memory
+			*   will be needed, so it may need to assemble the data from small chunks.
+			*   If you are reading in copious amounts of data, this may cause your program to fail.
+			*   YOU HAVE BEEN WARNED.
+			*/
+			BigDataBlock read_everything();
 			~ReadQuery();
 
 	};

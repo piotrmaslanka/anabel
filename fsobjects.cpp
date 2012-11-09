@@ -57,7 +57,7 @@ vector<Timestamp> Anabel::Internal::scan_directory(boost::filesystem::path direc
 	return files;
 }
 
-Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem::path path, unsigned record_size) : record_size(record_size), start_at_ofs(8), start_at_record(0) {
+Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem::path path, size_t record_size) : record_size(record_size), start_at_ofs(8), start_at_record(0) {
 	this->open(path.string().c_str(), std::ios::binary);
 	this->seekg(0, std::ios::end);
 	this->end_at_ofs = (unsigned)(this->tellg());		// end of file
@@ -73,12 +73,12 @@ Anabel::Internal::IntelligentFileReader::IntelligentFileReader(boost::filesystem
 	this->total_records = this->records_remaining;
 
 }
-unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time, bool is_start) {
+size_t Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time, bool is_start) {
 	Anabel::Timestamp temp;
-	unsigned imin = 0;
-	unsigned imax = this->total_records - 1;
-	unsigned amax = imax;
-	unsigned imid;
+	size_t imin = 0;
+	size_t imax = this->total_records - 1;
+	size_t amax = imax;
+	size_t imid;
 	
 	while (imax >= imin) {
 		imid = imin + ((imax - imin) / 2);
@@ -94,9 +94,8 @@ unsigned Anabel::Internal::IntelligentFileReader::locate(Anabel::Timestamp time,
 			imin = imid + 1;
 		} else {
 			if (imid == 0) // range exhausted.
-				if (is_start) {
-					return 0;
-				} else throw (int)1;	// stop before first record? nonsense.
+				if (is_start) return 0;
+				else throw (int)1;	// stop before first record? nonsense.
 
 			imax = imid - 1;
 		}
@@ -130,7 +129,7 @@ void Anabel::Internal::IntelligentFileReader::limit_start(Anabel::Timestamp star
 }
 void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) {
 	if (this->records_remaining == 0) return;
-	unsigned x;
+	size_t x;
 	try {
 		x = this->locate(stop, false);
 	} catch (int) {
@@ -141,13 +140,13 @@ void Anabel::Internal::IntelligentFileReader::limit_end(Anabel::Timestamp stop) 
 	this->end_at_ofs = (1+x)*(8+this->record_size) + 8;
 	this->records_remaining = (this->end_at_ofs - this->start_at_ofs) / (8 + this->record_size);
 }
-unsigned Anabel::Internal::IntelligentFileReader::get_data(unsigned records_to_read, void * buffer) {
+unsigned Anabel::Internal::IntelligentFileReader::get_data(size_t records_to_read, void * buffer) {
 	if (records_to_read > this->records_remaining) records_to_read = records_remaining;
 	this->read((char*)buffer, records_to_read*(8 + this->record_size));
 	this->records_remaining -= records_to_read;
 	return records_to_read;
 }
-void Anabel::Internal::IntelligentFileReader::seek_record(unsigned record_no) {
+void Anabel::Internal::IntelligentFileReader::seek_record(size_t record_no) {
 	if (record_no >= (this->total_records)) throw Anabel::Exceptions::InternalError("Cannot seek to record that does not exist");
 	this->seekg(8+(record_no*(8+this->record_size)));
 	this->records_remaining = this->total_records - record_no;

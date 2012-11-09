@@ -18,7 +18,28 @@
 #include <anabel/stdafx.h>
 #include <anabel/anabel.h>
 
-void Anabel::ReadQuery::set_desired_cache_size(unsigned elements) { this->desired_cache_size = elements; }
+void Anabel::ReadQuery::set_desired_cache_size(size_t elements) { this->desired_cache_size = elements; }
+
+size_t Anabel::ReadQuery::get_cache_size() { return this->desired_cache_size; }
+
+Anabel::BigDataBlock Anabel::ReadQuery::read_everything() {
+	BigDataBlock bb = {NULL, 0, 0};
+	const unsigned cache_buf_size = (8+this->record_size)*this->desired_cache_size;
+
+	void * chunk_buffer = malloc(cache_buf_size);
+
+	while (true) {
+		size_t records_readed = this->get_data(this->desired_cache_size, chunk_buffer);
+		bb.entries_readed += records_readed;
+		size_t mem_for_records = (8+this->record_size)*records_readed;
+		bb.buffer_length += mem_for_records;
+		bb.buffer = realloc(bb.buffer, bb.buffer_length);
+		memcpy((void*)((char*)(bb.buffer) + bb.buffer_length - mem_for_records), chunk_buffer, mem_for_records);
+	}
+	free(chunk_buffer);
+	return bb;	
+}
+
 
 void Anabel::ReadQuery::prime_cache(void) {
 	if (this->data_cache != NULL) free(this->data_cache);
@@ -33,20 +54,20 @@ void Anabel::ReadQuery::prime_cache(void) {
 	this->cache_ofs = this->data_cache;
 }
 
-unsigned Anabel::ReadQuery::get_data(unsigned count, void * buffer) {
+size_t Anabel::ReadQuery::get_data(size_t count, void * buffer) {
 	if (this->available_cache_entries == 0) {
 		this->prime_cache();
 		if (this->available_cache_entries == 0) return 0;
 	}
 	if (count > this->available_cache_entries) count = this->available_cache_entries;
-	unsigned bytes_to_copy = count * (8+this->record_size);
+	size_t bytes_to_copy = count * (8+this->record_size);
 	memcpy(buffer, this->cache_ofs, bytes_to_copy);
 	this->cache_ofs = ((char*)(this->cache_ofs)) + bytes_to_copy;
 	this->available_cache_entries -= count;
 	return count;
 }
 
-unsigned Anabel::ReadQuery::ll_get_data(unsigned count, void * buffer) {
+size_t Anabel::ReadQuery::ll_get_data(size_t count, void * buffer) {
 	if (this->opened_file != NULL)
 		if (this->opened_file->records_remaining == 0) {
 			delete this->opened_file;
@@ -71,7 +92,7 @@ unsigned Anabel::ReadQuery::ll_get_data(unsigned count, void * buffer) {
 		this->opened_file->prepare_read();
 	}
 
-	unsigned records_readed = this->opened_file->get_data(count, buffer);
+	size_t records_readed = this->opened_file->get_data(count, buffer);
 
 	return records_readed;
 }

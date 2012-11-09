@@ -33,25 +33,25 @@ namespace Anabel {
 
 			class IntelligentFileReader: public std::ifstream {
 				private:
-					unsigned start_at_ofs;
-					unsigned end_at_ofs;
-					unsigned record_size;
-					unsigned start_at_record;
-					unsigned total_records;
+					size_t start_at_ofs;
+					size_t end_at_ofs;
+					size_t record_size;
+					size_t start_at_record;
+					size_t total_records;
 
-					unsigned locate(Anabel::Timestamp time, bool is_start);
+					size_t locate(Anabel::Timestamp time, bool is_start);
 				public:
-					unsigned records_remaining;
-					IntelligentFileReader(boost::filesystem::path path, unsigned record_size);
+					size_t records_remaining;
+					IntelligentFileReader(boost::filesystem::path path, size_t record_size);
 					/**
 					* Seeks to given record. Records are numbered from 0. Throws InvalidInvocation exception if record does not exist.
 					* Happily disobeys previous limit_start and limit_end.
 					*/
-					void seek_record(unsigned record_no);
+					void seek_record(size_t record_no);
 					void limit_start(Anabel::Timestamp start);		
 					void limit_end(Anabel::Timestamp end);			
 					void prepare_read(void);	// invoke before using get_data and after limits
-					unsigned get_data(unsigned records_to_read, void * buffer);
+					size_t get_data(size_t records_to_read, void * buffer);
 			};
 
 		std::vector<Timestamp> scan_directory(boost::filesystem::path directory);
