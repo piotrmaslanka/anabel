@@ -3,12 +3,16 @@
 #include <sstream>
 #include <anabel/anabel.h>
 #include "simple_ops.h"
+#include "streamin.h"
 
 using namespace std;
 void display_usage_information() {
 	cout << "Werkzeug version 1.0" << endl << "Copyright (c) 2012 Piotr Maslanka" << "Part of Anabel time-series database" << endl;
 	cout << " -- THIS IS BUT A SIMPLE WRAPPER. WATCH YOUR INPUT!!! -- " << endl;
 	cout << "Available types: int32 float int8" << endl;
+	cout << " Stream in data from stdin, save to an existing timeseries" << endl;
+	cout << " Data is read from stdin in the same format that anabel-werkzeug view outputs" << endl << endl;
+	cout << "     anabel-werkzeug streamin <path_to_db> <type>" << endl;
 	cout << " Indenting a timeseries"<< endl << endl;
 	cout << "     anabel-werkzeug indent <path_to_db>" << endl;
 	cout << " Viewing a timeseries" << endl << endl;
@@ -17,6 +21,8 @@ void display_usage_information() {
 	cout << "     anabel-werkzeug append <path_to_db> <timestamp> <value> <type>" << endl;
 	cout << " Creating a new database" << endl << endl;
 	cout << "     anabel-werkzeug create <path_to_db> <record_size>" << endl;
+	cout << " Truncating a database" << endl << endl;
+	cout << "     anabel-werkzeug truncate <path_to_db>" << endl;
 
 	system("pause");
 }
@@ -28,22 +34,13 @@ int main(int argc, char* argv[])
 		if (argc != 3)
 		return indent(argv[2]);
 	}
-	if (strcmp(argv[1], "lerp-aggregate-store")==0) {
-		if (argc != 11) { display_usage_information(); return 1; }
-		string db1_path = argv[2];
-		string db2_path = argv[3];
-		Anabel::Timestamp db1_from, db1_to, db2_from, db2_to;
-		stringstream(argv[4]) >> db1_from;
-		stringstream(argv[5]) >> db1_to;
-		stringstream(argv[6]) >> db2_from;
-		stringstream(argv[7]) >> db2_to;
-		string operation = argv[8];
-		string commontype = argv[9];
-		string dbo_path = argv[10];
-		if (db1_to < db1_from) return 4;
-		if (db2_to < db2_from) return 4;
 
+	if (strcmp(argv[1], "streamin")==0) {
+		if (argc != 4) { display_usage_information(); return 1; }
+		string dtype = argv[3];
+		return streamin(argv[2], dtype);
 	}
+
 	if (strcmp(argv[1], "append")==0) {
 		if (argc != 6) { display_usage_information(); return 1; }
 		Anabel::Timestamp timestamp;
@@ -66,6 +63,11 @@ int main(int argc, char* argv[])
 		int record_size;
 		stringstream(argv[3]) >> record_size;
 		return create(argv[2], record_size);
+	}
+
+	if (strcmp(argv[1], "truncate") == 0) {
+		if (argc != 3) { display_usage_information(); return 1; }
+		return truncate(argv[2]);
 	}
 
 	system("pause");

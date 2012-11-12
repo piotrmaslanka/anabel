@@ -4,6 +4,18 @@
 using namespace Anabel;
 using namespace std;
 
+int truncate(char * db_path) {
+	try {
+		TimeSeries ts(db_path);
+		ts.open(TSO_WRITE);
+		ts.truncate();
+		ts.close();
+	} catch (Anabel::Exceptions::InvalidRootDirectory) {
+		return 2;
+	}
+	return 0;
+}
+
 int indent(char * db_to_indent) {
 	try {
 		TimeSeries ts(db_to_indent);
@@ -11,7 +23,6 @@ int indent(char * db_to_indent) {
 		ts.indent();
 		ts.close();
 	} catch (Anabel::Exceptions::InvalidRootDirectory) {
-		std::cout << "ERROR: Invalid directory" << std::endl;
 		return 2;
 	}
 	return 0;
