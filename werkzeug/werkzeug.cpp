@@ -8,8 +8,7 @@
 using namespace std;
 void display_usage_information() {
 	cout << "Werkzeug version 1.0" << endl << "Copyright (c) 2012 Piotr Maslanka" << "Part of Anabel time-series database" << endl;
-	cout << " -- THIS IS BUT A SIMPLE WRAPPER. WATCH YOUR INPUT!!! -- " << endl;
-	cout << "Available types: int32 float int8" << endl;
+	cout << "Available types: int64 int32 float int8" << endl;
 	cout << " Stream in data from stdin, save to an existing timeseries" << endl;
 	cout << " Data is read from stdin in the same format that anabel-werkzeug view outputs" << endl << endl;
 	cout << "     anabel-werkzeug streamin <path_to_db> <type>" << endl;

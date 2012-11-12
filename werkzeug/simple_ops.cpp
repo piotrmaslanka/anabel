@@ -66,6 +66,7 @@ int append(char * db_path, Anabel::Timestamp timestamp, std::string value, char 
 	ts->open(TSO_APPEND);
 
 	if ((strcmp(commontype, "float")==0) && (ts->record_size != 4)) return 3;
+	if ((strcmp(commontype, "int64")==0) && (ts->record_size != 8)) return 3;
 	if ((strcmp(commontype, "int32")==0) && (ts->record_size != 4)) return 3;
 	if ((strcmp(commontype, "int8")==0) && (ts->record_size != 1)) return 3;
 
@@ -76,6 +77,11 @@ int append(char * db_path, Anabel::Timestamp timestamp, std::string value, char 
 		float f;
 		std::stringstream(value) >> f;
 		*(float*)(absurdity_of_life+8) = f;
+	}
+	if (strcmp(commontype, "int64")==0) {
+		long long f;
+		std::stringstream(value) >> f;
+		*(long long*)(absurdity_of_life+8) = f;
 	}
 	if (strcmp(commontype, "int32")==0) {
 		int f;
@@ -107,6 +113,7 @@ int view(char * db_path, Anabel::Timestamp t_from, Anabel::Timestamp t_to, char 
 	Anabel::ReadQuery * rq = ts->get_query(t_from, t_to);	// validity was checked earlier
 
 	int return_value;
+	if (strcmp("int64", commontype)==0) return_value = view_t(*rq, (long long)0, ts->record_size);
 	if (strcmp("int32", commontype)==0) return_value = view_t(*rq, (int)0, ts->record_size);
 	if (strcmp("int8", commontype)==0) return_value = view_t(*rq, (char)0, ts->record_size);
 	if (strcmp("float", commontype)==0) return_value = view_t(*rq, (float)0, ts->record_size);

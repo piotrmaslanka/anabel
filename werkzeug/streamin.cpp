@@ -36,6 +36,7 @@ int streamin(char * path, std::string type) {
 		AppendingSession * as = ts.get_appending_session();	// streamin_t has to free this
 		if (type == "int8") return streamin_t(as, (char)0);
 		if (type == "int32") return streamin_t(as, (int)0);
+		if (type == "int64") return streamin_t(as, (long long)0);
 		if (type == "float") return streamin_t(as, (float)0);
 	} catch (Exceptions::InvalidRootDirectory) {
 		return 2;
