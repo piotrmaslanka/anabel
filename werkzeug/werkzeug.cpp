@@ -22,8 +22,6 @@ void display_usage_information() {
 	cout << "     anabel-werkzeug create <path_to_db> <record_size>" << endl;
 	cout << " Truncating a database" << endl << endl;
 	cout << "     anabel-werkzeug truncate <path_to_db>" << endl;
-
-	system("pause");
 }
 
 int main(int argc, char* argv[])
@@ -69,7 +67,6 @@ int main(int argc, char* argv[])
 		return truncate(argv[2]);
 	}
 
-	system("pause");
 	return 0;
 }
 

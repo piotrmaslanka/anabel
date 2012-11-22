@@ -119,6 +119,5 @@ int view(char * db_path, Anabel::Timestamp t_from, Anabel::Timestamp t_to, char 
 	if (strcmp("float", commontype)==0) return_value = view_t(*rq, (float)0, ts->record_size);
 
 	delete rq;
-	system("pause");
 	return return_value;
 }
