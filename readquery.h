@@ -26,10 +26,21 @@ namespace Anabel {
 	Refer to Anabel::TimeSeries foreword on what Buffer Format is.
 	*/
 
-	struct BigDataBlock {
-		void * buffer;
-		size_t buffer_length;
-		size_t entries_readed;
+	class BigDataBlock {
+		friend class ReadQuery;
+		public:
+			void * buffer;
+			size_t entries_readed;
+			size_t buffer_length;
+			BigDataBlock();
+			~BigDataBlock();
+			/**
+			When interfacing with automatically memory-managed systems, calling the destructors might
+			be seriously deferred. Unfortunately, BDB's hold a lot of memory in it's buffers, so it 
+			may be preferable to have a call that safely frees that memory.
+			It is safe to call invalidate(), and then have the object destructor called
+			*/
+			void invalidate();
 	};
 
 	class ReadQuery {
@@ -77,8 +88,7 @@ namespace Anabel {
 			*   If you are reading in copious amounts of data, this may cause your program to fail.
 			*   YOU HAVE BEEN WARNED.
 			*/
-			BigDataBlock read_everything();
+			BigDataBlock * read_everything();
 			~ReadQuery();
-
 	};
 };

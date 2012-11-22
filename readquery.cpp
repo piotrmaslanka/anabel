@@ -22,8 +22,19 @@ void Anabel::ReadQuery::set_desired_cache_size(size_t elements) { this->desired_
 
 size_t Anabel::ReadQuery::get_cache_size() { return this->desired_cache_size; }
 
-Anabel::BigDataBlock Anabel::ReadQuery::read_everything() {
-	BigDataBlock bb = {NULL, 0, 0};
+Anabel::BigDataBlock::BigDataBlock() : buffer(NULL), buffer_length(0), entries_readed(0) {}
+Anabel::BigDataBlock::~BigDataBlock() { if (this->buffer != NULL) free(this->buffer); }
+void Anabel::BigDataBlock::invalidate() {
+	if (this->buffer != NULL) {
+		free(this->buffer);
+		this->buffer = NULL;
+		this->entries_readed = 0; 
+		this->buffer_length = 0; 
+	} 
+}
+
+Anabel::BigDataBlock * Anabel::ReadQuery::read_everything() {
+	BigDataBlock * bb = new BigDataBlock();
 	const unsigned cache_buf_size = (8+this->record_size)*this->desired_cache_size;
 
 	void * chunk_buffer = malloc(cache_buf_size);
@@ -31,11 +42,11 @@ Anabel::BigDataBlock Anabel::ReadQuery::read_everything() {
 	while (true) {
 		size_t records_readed = this->get_data(this->desired_cache_size, chunk_buffer);
 		if (records_readed == 0) break;
-		bb.entries_readed += records_readed;
+		bb->entries_readed += records_readed;
 		size_t mem_for_records = (8+this->record_size)*records_readed;
-		bb.buffer_length += mem_for_records;
-		bb.buffer = realloc(bb.buffer, bb.buffer_length);
-		memcpy((void*)((char*)(bb.buffer) + bb.buffer_length - mem_for_records), chunk_buffer, mem_for_records);
+		bb->buffer_length += mem_for_records;
+		bb->buffer = realloc(bb->buffer, bb->buffer_length);
+		memcpy((void*)((char*)(bb->buffer) + bb->buffer_length - mem_for_records), chunk_buffer, mem_for_records);
 	}
 	free(chunk_buffer);
 	return bb;	
