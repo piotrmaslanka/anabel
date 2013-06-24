@@ -13,4 +13,4 @@ Anabel's on-disk binary format is very simple and capable of storing absurd amou
 
 Because Anabel is a library, getting the most out of it would require writing a program to interface with it. However, a simple command-line program - "werkzeug" - is attached. It can perform most simple operations on the database, and in a pinch can be used to do full interfacing with it.
 
-See the project's wiki for more information, and LICENSE for license text.
+See the project's wiki for more information, and COPYING for license text.
