@@ -49,6 +49,12 @@ import_array();
 %apply (float* ARGOUT_ARRAY1, int DIM1) {(float * outvec, unsigned long long amount)}
 %apply (float* ARGOUT_ARRAY1, int DIM1) {(float * outvec, size_t amount)}
 
+%apply (signed char* ARGOUT_ARRAY1, int DIM1) {(signed char * outvec, unsigned amount)}
+%apply (signed char* ARGOUT_ARRAY1, int DIM1) {(signed char * outvec, int amount)}
+%apply (signed char* ARGOUT_ARRAY1, int DIM1) {(signed char * outvec, long long amount)}
+%apply (signed char* ARGOUT_ARRAY1, int DIM1) {(signed char * outvec, unsigned long long amount)}
+%apply (signed char* ARGOUT_ARRAY1, int DIM1) {(signed char * outvec, size_t amount)}
+
 %include "py-interface.h"
 
 namespace Anabel {
